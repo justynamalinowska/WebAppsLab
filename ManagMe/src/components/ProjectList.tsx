@@ -10,13 +10,17 @@ const projectList = (Props: Props) => {
     const{list} = Props;
     return (
         <div>
+            <div className="projects-header">
             <h2>Projects List</h2>
+            <input type="button" value="Add Project"/>
+        </div>
             <table className="styled-table">
     <thead>
         <tr>
             <th>Id</th>
             <th>Name</th>
             <th>Description</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +30,13 @@ const projectList = (Props: Props) => {
                 <td>{project.id}</td>
                 <td>{project.name}</td>
                 <td>{project.description}</td>
+                <td>
+                    <div>
+                        <input type="button" value="View"/>
+                        <input type="button" value="Edit"/>
+                        <input type="button" value="Delete"/>
+                    </div>
+                </td>
             </tr>
             );
             })}

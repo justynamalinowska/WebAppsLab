@@ -15,7 +15,7 @@ const Home = () => {
         </article>
 
         <section className="section-content">
-            <ProjectList list={projectList}/>
+        <ProjectList list={projectList}/>
         </section>
     </>);
     }
