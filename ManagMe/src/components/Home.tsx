@@ -17,7 +17,7 @@ const Home = () => {
         </article>
 
         <section className="section-content">
-            {shownPage === PageEnum.list && <ProjectList list={projectList}/>}
+            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage}/>}
             {shownPage === PageEnum.add && <AddProject/>}
         </section>
     </>);

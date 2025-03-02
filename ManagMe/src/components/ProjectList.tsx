@@ -1,18 +1,17 @@
-import { IProject } from "./Project.type";
+import { IProject, PageEnum } from "./Project.type";
 import "./ProjectList.style.css";
 
 type Props = {
     list: IProject[];
+    setShownPage: (page: PageEnum) => void;
 }
 
-const projectList = (Props: Props) => {
-
-    const{list} = Props;
+const ProjectList = ({ list, setShownPage }: Props) => {
     return (
         <div>
             <div className="projects-header">
             <h2>Projects List</h2>
-            <input type="button" value="Add Project"/>
+            <input type="button" value="Add Project" onClick={() => setShownPage(PageEnum.add)}/>
         </div>
             <table className="styled-table">
     <thead>
@@ -46,4 +45,4 @@ const projectList = (Props: Props) => {
     )
 }
 
-export default projectList;
+export default ProjectList;
