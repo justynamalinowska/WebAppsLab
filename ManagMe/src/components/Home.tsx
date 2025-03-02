@@ -9,6 +9,12 @@ const Home = () => {
     const [projectList, setProjectsList] = useState(defaultProjectList as IProject[]);
     const [shownPage, setShownPage] = useState(PageEnum.list);
     const showListPage = () => setShownPage(PageEnum.list);
+
+    const addProjectHnd = (data: IProject) => {
+        setProjectsList([...projectList, data]);
+        showListPage();
+    }
+
     return (
     <> 
         <article className="article-header">
@@ -19,7 +25,7 @@ const Home = () => {
 
         <section className="section-content">
             {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage}/>}
-            {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage}/>}
+            {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
         </section>
     </>);
     };

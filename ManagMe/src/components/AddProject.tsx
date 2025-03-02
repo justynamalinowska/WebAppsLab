@@ -1,8 +1,10 @@
 import "./Project.Form.style.css"
 import React, { useState } from "react";
+import { IProject } from "./Project.type";
 
 type Props = {
     onBackBtnClickHnd: () => void;
+    onSubmitClickHnd: (data: IProject) => void;
 }
 
 const AddProject = (Props: Props) => {
@@ -10,7 +12,7 @@ const AddProject = (Props: Props) => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
-    const { onBackBtnClickHnd } = Props;
+    const { onBackBtnClickHnd, onSubmitClickHnd } = Props;
 
     const onNameChangeHnd = (e : any) => {
         setName(e.target.value);
@@ -20,10 +22,22 @@ const AddProject = (Props: Props) => {
         setDescription(e.target.value);
     }
 
+    const onSubmitBtnClickHnd = (e : any) => {
+        e.preventDefault();
+        const data: IProject = {
+            id: "",
+            name: name,
+            description: description
+        }
+
+        onSubmitClickHnd(data);
+        onBackBtnClickHnd();
+    }
+
     return (
         <div className="form-container">
             <h2>Add Project</h2>
-            <form>
+            <form onSubmit={onSubmitBtnClickHnd}>
                 <div>
                     <label>Name</label>
                     <input type="text" name="name" value={name} onChange={onNameChangeHnd}/>
@@ -34,7 +48,7 @@ const AddProject = (Props: Props) => {
                 </div>
                 <div className="add-project-buttons">
                     <input type="button" value="Back" onClick={onBackBtnClickHnd} />
-                    <input type="button" value="Add Project" />
+                    <input type="submit" value="Add Project" />
                 </div>
             </form>
         </div>
