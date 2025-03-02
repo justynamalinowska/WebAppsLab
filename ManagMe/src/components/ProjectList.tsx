@@ -12,11 +12,11 @@ type Props = {
 const ProjectList = (props: Props) => {
     const { list, setShownPage, onDeleteClickHnd } = props;
     const [showModal, setShowModal] = useState(false);
-    const [selectedProject, setSelectedProject] = useState<IProject | null>(null); // Dodajemy stan dla wybranego projektu
+    const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
 
     const viewProject = (project: IProject) => {
-        setSelectedProject(project); // Ustawiamy wybrany projekt
-        setShowModal(true); // Otwieramy modal
+        setSelectedProject(project);
+        setShowModal(true); 
     };
 
     return (
