@@ -1,10 +1,11 @@
 import "./Home.style.css";
 import { useState } from "react";
 import { IProject, defaultProjectList } from "./Project.type";
+import ProjectList from "./ProjectList";
 
 const Home = () => {
 
-    const [projectsList, setProjectsList] = useState(defaultProjectList as IProject[]);
+    const [projectList, setProjectsList] = useState(defaultProjectList as IProject[]);
     return (
     <> 
         <article className="article-header">
@@ -13,8 +14,8 @@ const Home = () => {
             </header>
         </article>
 
-        <section>
-            <div className="ection-content"></div>
+        <section className="section-content">
+            <ProjectList list={projectList}/>
         </section>
     </>);
     }

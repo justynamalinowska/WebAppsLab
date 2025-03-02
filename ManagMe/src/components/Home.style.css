@@ -1,11 +1,16 @@
 .article-header{
-    background-color: rgb(182, 182, 182);
+    background-color: #F8C8DC;
     color: #ffffff;
     border: 3px solid transparent;
     text-align: center;
-    letter-spacing: 15%;
+    letter-spacing: 20%;
 }
 
 .section-content{
-    margin: 10%;
+    margin-top: 5%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
 }

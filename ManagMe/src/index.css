@@ -25,6 +25,13 @@ a:hover {
 h1 {
   font-size: 2.2em;
   line-height: 1.1;
+  letter-spacing: 0.1em;
+}
+
+h2 {
+  font-size: 1.5em;
+  line-height: 1;
+  letter-spacing: 0.1em;
 }
 
 button {
