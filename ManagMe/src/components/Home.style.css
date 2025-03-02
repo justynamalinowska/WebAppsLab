@@ -1,0 +1,11 @@
+.article-header{
+    background-color: rgb(182, 182, 182);
+    color: #ffffff;
+    border: 3px solid transparent;
+    text-align: center;
+    letter-spacing: 15%;
+}
+
+.section-content{
+    margin: 10%;
+}
