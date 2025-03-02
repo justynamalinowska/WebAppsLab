@@ -4,9 +4,11 @@ import "./ProjectList.style.css";
 type Props = {
     list: IProject[];
     setShownPage: (page: PageEnum) => void;
+    onDeleteClickHnd : (data: IProject) => void;
 }
 
-const ProjectList = ({ list, setShownPage }: Props) => {
+const ProjectList = ({ list, setShownPage, onDeleteClickHnd }: Props) => {
+
     return (
         <div>
             <div className="projects-header">
@@ -33,7 +35,7 @@ const ProjectList = ({ list, setShownPage }: Props) => {
                     <div className="action-buttons">
                         <input type="button" value="View"/>
                         <input type="button" value="Edit"/>
-                        <input type="button" value="Delete"/>
+                        <input type="button" value="Delete" onClick={() => onDeleteClickHnd(project)} />
                     </div>
                 </td>
             </tr>

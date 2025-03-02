@@ -15,6 +15,14 @@ const Home = () => {
         showListPage();
     }
 
+    const deleteProject = (data: IProject) => {
+        const indexToDelete = projectList.indexOf(data);
+        const tempList = [...projectList];
+
+        tempList.splice(indexToDelete, 1);
+        setProjectsList(tempList);
+    };
+
     return (
     <> 
         <article className="article-header">
@@ -24,7 +32,7 @@ const Home = () => {
         </article>
 
         <section className="section-content">
-            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage}/>}
+            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
         </section>
     </>);
