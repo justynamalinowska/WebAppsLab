@@ -21,3 +21,8 @@ export const defaultProjectList : IProject[] = [
     description: "A project to create a mobile application using React Native."
   }
 ];
+
+export enum PageEnum {
+  list,
+  add
+}

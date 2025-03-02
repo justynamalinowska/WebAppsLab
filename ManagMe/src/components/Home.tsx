@@ -1,11 +1,13 @@
 import "./Home.style.css";
 import { useState } from "react";
-import { IProject, defaultProjectList } from "./Project.type";
+import { IProject, PageEnum, defaultProjectList } from "./Project.type";
 import ProjectList from "./ProjectList";
+import AddProject from "./AddProject";
 
 const Home = () => {
 
     const [projectList, setProjectsList] = useState(defaultProjectList as IProject[]);
+    const [shownPage, setShownPage] = useState(PageEnum.list);
     return (
     <> 
         <article className="article-header">
@@ -15,9 +17,10 @@ const Home = () => {
         </article>
 
         <section className="section-content">
-        <ProjectList list={projectList}/>
+            {shownPage === PageEnum.list && <ProjectList list={projectList}/>}
+            {shownPage === PageEnum.add && <AddProject/>}
         </section>
     </>);
-    }
+    };
 
 export default Home;
