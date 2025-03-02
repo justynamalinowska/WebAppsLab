@@ -30,7 +30,7 @@ const ProjectList = ({ list, setShownPage }: Props) => {
                 <td>{project.name}</td>
                 <td>{project.description}</td>
                 <td>
-                    <div>
+                    <div className="action-buttons">
                         <input type="button" value="View"/>
                         <input type="button" value="Edit"/>
                         <input type="button" value="Delete"/>
