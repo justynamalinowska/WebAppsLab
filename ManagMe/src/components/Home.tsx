@@ -1,20 +1,33 @@
 import "./Home.style.css";
-import { useState } from "react";
-import { IProject, PageEnum, defaultProjectList } from "./Project.type";
+import { useEffect, useState } from "react";
+import { IProject, PageEnum } from "./Project.type";
 import ProjectList from "./ProjectList";
 import AddProject from "./AddProject";
 import EditProject from "./EditProject";
 
 const Home = () => {
 
-    const [projectList, setProjectsList] = useState(defaultProjectList as IProject[]);
+    const [projectList, setProjectsList] = useState([] as IProject[]);
     const [shownPage, setShownPage] = useState(PageEnum.list);
     const [dataToEdit, setDataToEdit] = useState({} as IProject);
 
     const showListPage = () => setShownPage(PageEnum.list);
 
+    useEffect(() => {
+        const projectsListInString = window.localStorage.getItem("projects");
+        if (projectsListInString) {
+            setProjectsList(JSON.parse(projectsListInString));
+        }
+    }
+    , []);
+
+    const _setProjectsList = (data: IProject[]) => {
+        setProjectsList(data);
+        window.localStorage.setItem("projects", JSON.stringify(data));
+    };
+
     const addProjectHnd = (data: IProject) => {
-        setProjectsList([...projectList, data]);
+        _setProjectsList([...projectList, data]);
         showListPage();
     }
 
@@ -23,7 +36,7 @@ const Home = () => {
         const tempList = [...projectList];
 
         tempList.splice(indexToDelete, 1);
-        setProjectsList(tempList);
+        _setProjectsList(tempList);
     };
 
     const editProject = (data: IProject) => {
@@ -36,7 +49,7 @@ const Home = () => {
         const indexOfRecord = projectList.indexOf(filterData);
         const tempList = [...projectList];
         tempList[indexOfRecord] = data;
-        setProjectsList(tempList);
+        _setProjectsList(tempList);
         showListPage();
     };
 
