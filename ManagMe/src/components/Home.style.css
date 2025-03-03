@@ -16,19 +16,19 @@
 }
 
 .projects-header h2{
-    margin: auto;
+    margin: 0; 
+    flex-grow: 1; 
+    text-align: center; 
 }
 
 .projects-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     position: relative;
 }
 
 .projects-header input {
-    position: absolute; 
-    right: 1.7em; 
     width: auto; 
     padding: 0.5em 1em;
     border-radius: 8px;
