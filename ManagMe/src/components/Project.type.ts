@@ -24,5 +24,6 @@ export const defaultProjectList : IProject[] = [
 
 export enum PageEnum {
   list,
-  add
+  add, 
+  edit
 }
