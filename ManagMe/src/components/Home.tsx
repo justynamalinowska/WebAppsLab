@@ -4,14 +4,14 @@ import { IProject, PageEnum } from "./Project.type";
 import ProjectList from "./ProjectList";
 import AddProject from "./AddProject";
 import EditProject from "./EditProject";
-import User from "./User";
+import {IUser} from "./User.type";
 
 const Home = () => {
 
     const [projectList, setProjectsList] = useState([] as IProject[]);
     const [shownPage, setShownPage] = useState(PageEnum.list);
     const [dataToEdit, setDataToEdit] = useState({} as IProject);
-    const [user, setUser] = useState(new User(1, "Justyna", "Malinowska"));
+    const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska" });
 
     const showListPage = () => setShownPage(PageEnum.list);
 
@@ -60,7 +60,7 @@ const Home = () => {
         <article className="article-header">
             <header>
                 <h1>ManageMe</h1>
-                <p>Welcome, {user.name} {user.surname}</p>
+                <p>Welcome, {user.firstName} {user.lastName}</p>
             </header>
         </article>
 
