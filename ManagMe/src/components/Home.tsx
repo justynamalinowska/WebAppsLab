@@ -29,9 +29,19 @@ const Home = () => {
 
     useEffect(() => {
         if (currentProject) {
-            Api.getStories(currentProject.id).then(setStories);
+            Api.getStories(currentProject.id.toString()).then(setStories);
         }
     }, [currentProject]);
+
+    const _setProjectsList = (data: IProject[]) => {
+        setProjectsList(data);
+        window.localStorage.setItem("projects", JSON.stringify(data));
+    };
+
+    const generateUniqueId = (): number => {
+        const ids = projectList.map(project => project.id);
+        return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+    };
 
     useEffect(() => {
         const projectsListInString = window.localStorage.getItem("projects");
@@ -41,13 +51,9 @@ const Home = () => {
     }
     , []);
 
-    const _setProjectsList = (data: IProject[]) => {
-        setProjectsList(data);
-        window.localStorage.setItem("projects", JSON.stringify(data));
-    };
-
     const addProjectHnd = (data: IProject) => {
-        _setProjectsList([...projectList, data]);
+        const newProject = { ...data, id: generateUniqueId() };
+        _setProjectsList([...projectList, newProject]);
         showListPage();
     }
 
