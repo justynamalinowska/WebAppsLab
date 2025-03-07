@@ -7,7 +7,7 @@ import EditProject from "./EditProject";
 import {IUser} from "./User.type";
 import Api from "./Api";
 import { IStory } from "./Story.type";
-import SectionContentStories from "./SectionContentStories";
+import StoriesList from "./StoryList";
 
 const Home = () => {
 
@@ -86,6 +86,18 @@ const Home = () => {
         setShownPage(PageEnum.stories);
     };
 
+    const editStory = (story: IStory) => {
+        // Implement edit story functionality
+    };
+
+    const deleteStory = (story: IStory) => {
+        // Implement delete story functionality
+    };
+
+    const addStory = (story: IStory) => {
+        // Implement add story functionality
+    };
+
     return (
     <> 
         <article className="article-header">
@@ -99,7 +111,7 @@ const Home = () => {
             {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
             {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
-            {shownPage === PageEnum.stories && currentProject && (<SectionContentStories project={currentProject} userStories={stories} />
+            {shownPage === PageEnum.stories && currentProject && (<StoriesList list={stories} onEdit={editStory} onDelete={deleteStory} onSelect={addStory} />
             )}
         </section>
     </>);
