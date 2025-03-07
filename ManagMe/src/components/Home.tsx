@@ -111,7 +111,7 @@ const Home = () => {
             {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
             {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
-            {shownPage === PageEnum.stories && currentProject && (<StoriesList list={stories} onEdit={editStory} onDelete={deleteStory} onSelect={addStory} />
+            {shownPage === PageEnum.stories && currentProject && (<StoriesList list={stories} projectName={currentProject.name} onEdit={editStory} onDeleteClickHnd={deleteStory} onSelect={addStory} />
             )}
         </section>
     </>);

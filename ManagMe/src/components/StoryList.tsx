@@ -4,13 +4,14 @@ import { useState } from "react";
 
 type Props = {
     list: IStory[];
+    projectName: string;
     onDeleteClickHnd: (data: IStory) => void;
     onEdit: (data: IStory) => void;
     onSelect: (data: IStory) => void;
 };
 
 const StoryList = (props: Props) => {
-    const { list = [], onDeleteClickHnd, onEdit, onSelect } = props; // Default to empty array if list is undefined
+    const { list = [], projectName, onDeleteClickHnd, onEdit, onSelect } = props; // Default to empty array if list is undefined
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
@@ -22,7 +23,7 @@ const StoryList = (props: Props) => {
     return (
         <div>
             <div className="stories-header">
-                <h2>User Stories List</h2>
+                <h2>{projectName}</h2>
                 <input type="button" value="Add Story" onClick={() => onSelect({} as IStory)} />
             </div>
             <table className="styled-table">
