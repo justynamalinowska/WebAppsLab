@@ -41,6 +41,15 @@
     text-align: center;
 }
 
+.section-content-stories{
+    margin-top: 5%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
 .projects-header h2{
     margin: 0; 
     flex-grow: 1; 
