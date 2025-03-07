@@ -5,6 +5,8 @@ import ProjectList from "./ProjectList";
 import AddProject from "./AddProject";
 import EditProject from "./EditProject";
 import {IUser} from "./User.type";
+import Api from "./Api";
+import { IStory } from "./Story.type";
 
 const Home = () => {
 
@@ -12,8 +14,24 @@ const Home = () => {
     const [shownPage, setShownPage] = useState(PageEnum.list);
     const [dataToEdit, setDataToEdit] = useState({} as IProject);
     const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska" });
+    const [currentProject, setCurrentProject] = useState<IProject | null>(null);
+    const [stories, setStories] = useState([] as IStory[]);
 
     const showListPage = () => setShownPage(PageEnum.list);
+
+    useEffect(() => {
+        Api.getProjects().then(setProjectsList);
+    }, []);
+
+    useEffect(() => {
+        Api.getCurrentProject().then(setCurrentProject);
+    }, []);
+
+    useEffect(() => {
+        if (currentProject) {
+            Api.getStories(currentProject.id).then(setStories);
+        }
+    }, [currentProject]);
 
     useEffect(() => {
         const projectsListInString = window.localStorage.getItem("projects");
@@ -55,6 +73,11 @@ const Home = () => {
         showListPage();
     };
 
+    const selectProject = (project: IProject) => {
+        setCurrentProject(project);
+        Api.setCurrentProject(project);
+    };
+
     return (
     <> 
         <article className="article-header">
@@ -65,9 +88,8 @@ const Home = () => {
         </article>
 
         <section className="section-content">
-            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject}/>}
+            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
-
             {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
         </section>
     </>);

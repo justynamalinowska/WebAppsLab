@@ -8,10 +8,11 @@ type Props = {
     setShownPage: (page: PageEnum) => void;
     onDeleteClickHnd: (data: IProject) => void;
     onEdit: (data: IProject) => void;
+    onSelect: (data: IProject) => void;
 };
 
 const ProjectList = (props: Props) => {
-    const { list, setShownPage, onDeleteClickHnd, onEdit } = props;
+    const { list, setShownPage, onDeleteClickHnd, onEdit, onSelect } = props;
     const [showModal, setShowModal] = useState(false);
     const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
 
@@ -47,6 +48,7 @@ const ProjectList = (props: Props) => {
                                         <input type="button" value="View" onClick={() => viewProject(project)} /> {/* Przekazujemy projekt do viewProject */}
                                         <input type="button" value="Edit" onClick={() => onEdit(project)}/>
                                         <input type="button" value="Delete" onClick={() => onDeleteClickHnd(project)} />
+                                        <input type="button" value="Select" onClick={() => onSelect(project)} />
                                     </div>
                                 </td>
                             </tr>
