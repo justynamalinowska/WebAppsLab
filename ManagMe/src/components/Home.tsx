@@ -7,6 +7,7 @@ import EditProject from "./EditProject";
 import {IUser} from "./User.type";
 import Api from "./Api";
 import { IStory } from "./Story.type";
+import SectionContentStories from "./SectionContentStories";
 
 const Home = () => {
 
@@ -82,6 +83,7 @@ const Home = () => {
     const selectProject = (project: IProject) => {
         setCurrentProject(project);
         Api.setCurrentProject(project);
+        setShownPage(PageEnum.stories);
     };
 
     return (
@@ -93,10 +95,12 @@ const Home = () => {
             </header>
         </article>
 
-        <section className="section-content">
+        <section className="section-content-projects">
             {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
             {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
+            {shownPage === PageEnum.stories && currentProject && (<SectionContentStories project={currentProject} userStories={stories} />
+            )}
         </section>
     </>);
     };
