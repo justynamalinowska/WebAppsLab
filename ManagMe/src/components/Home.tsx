@@ -11,7 +11,7 @@ const Home = () => {
     const [projectList, setProjectsList] = useState([] as IProject[]);
     const [shownPage, setShownPage] = useState(PageEnum.list);
     const [dataToEdit, setDataToEdit] = useState({} as IProject);
-    const [user, setUser] = useState(new User("Justyna", "Malinowska"));
+    const [user, setUser] = useState(new User(1, "Justyna", "Malinowska"));
 
     const showListPage = () => setShownPage(PageEnum.list);
 

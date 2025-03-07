@@ -1,5 +1,5 @@
 class User {
-    constructor(public name: string, public surname: string) {}
+    constructor(public id: number, public name: string, public surname: string) {}
   }
   
   export default User;
