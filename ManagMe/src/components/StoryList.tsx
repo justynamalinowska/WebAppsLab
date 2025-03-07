@@ -1,17 +1,19 @@
+import { IProject } from "./Project.type";
+import ProjectList from "./ProjectList";
 import { IStory } from "./Story.type";
-// import "./StoryList.style.css";
+import "./StoryList.style.css";
 import { useState } from "react";
 
 type Props = {
+    project : IProject;
     list: IStory[];
-    projectName: string;
     onDeleteClickHnd: (data: IStory) => void;
     onEdit: (data: IStory) => void;
     onSelect: (data: IStory) => void;
 };
 
 const StoryList = (props: Props) => {
-    const { list = [], projectName, onDeleteClickHnd, onEdit, onSelect } = props; // Default to empty array if list is undefined
+    const { project, list = [], onDeleteClickHnd, onEdit, onSelect } = props; 
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
@@ -23,7 +25,7 @@ const StoryList = (props: Props) => {
     return (
         <div>
             <div className="stories-header">
-                <h2>{projectName}</h2>
+                <h2>{project.name}</h2>
                 <input type="button" value="Add Story" onClick={() => onSelect({} as IStory)} />
             </div>
             <table className="styled-table">
