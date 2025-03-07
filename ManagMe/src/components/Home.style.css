@@ -4,6 +4,32 @@
     border: 3px solid transparent;
     text-align: center;
     letter-spacing: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.article-header header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.article-header h1 {
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.article-header p {
+    margin: 0;
+    font-size: 1.2em;
+    color: #ffffff;
+    position: absolute;
+    right: 20px;
 }
 
 .section-content{
