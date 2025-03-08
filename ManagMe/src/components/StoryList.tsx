@@ -1,5 +1,4 @@
 import { IProject } from "./Project.type";
-import ProjectList from "./ProjectList";
 import { IStory } from "./Story.type";
 import "./StoryList.style.css";
 import { useState } from "react";
@@ -53,7 +52,6 @@ const StoryList = (props: Props) => {
                                         <input type="button" value="View" onClick={() => viewStory(story)} />
                                         <input type="button" value="Edit" onClick={() => onEdit(story)} />
                                         <input type="button" value="Delete" onClick={() => onDeleteClickHnd(story)} />
-                                        <input type="button" value="Select" onClick={() => onSelect(story)} />
                                     </div>
                                 </td>
                             </tr>

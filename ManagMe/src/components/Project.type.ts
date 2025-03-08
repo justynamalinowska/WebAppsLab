@@ -4,7 +4,7 @@ export interface IProject {
   id: number;
   name: string;
   description: string;
-  stories: IStory[];
+  stories?: IStory[];
 }
 
 export enum PageEnum {

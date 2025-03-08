@@ -3,7 +3,7 @@ export interface IStory {
     name: string;
     description: string;
     priority: "low" | "medium" | "high";
-    projectId: string;
+    projectId: number;
     createdAt: Date;
     status: "todo" | "doing" | "done";
     ownerId: string;
