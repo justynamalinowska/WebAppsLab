@@ -28,7 +28,8 @@ const EditProject = (props: Props) => {
                 const updatedData: IProject = {
                     id: data.id,
                     name: name,
-                    description: description
+                    description: description,
+                    stories: data.stories
                 }
         
                 onUpdateClickHnd(updatedData);
