@@ -139,6 +139,7 @@ const Home = () => {
     };
 
     const backToProjectList = () => {
+        Api.setCurrentProject({} as IProject);
         setShownPage(PageEnum.list);
     };
 
