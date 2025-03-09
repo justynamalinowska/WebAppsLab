@@ -1,58 +1,57 @@
-import "./Project.Form.style.css";
-import React, { useState } from "react";
 import { IStory } from "./Story.type";
-import { IProject } from "./Project.type";
+import "./Project.Form.style.css";
+import { useState } from "react";
 
 type Props = {
-    project: IProject | null;
-    userId: string | null;
+    data: IStory;
     onBackBtnClickHnd: () => void;
-    onSubmitClickHnd: (data: IStory) => void;
-};
+    onUpdateClickHnd: (data: IStory) => void;
+}
 
-const AddStory: React.FC<Props> = ({ project, userId, onBackBtnClickHnd, onSubmitClickHnd }) => {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [priority, setPriority] = useState<"low" | "medium" | "high">("low");
-    const [status, setStatus] = useState<"todo" | "doing" | "done">("todo");
+const EditStory = (props: Props) => {
+    const { data, onBackBtnClickHnd, onUpdateClickHnd } = props;
 
-    const onTitleChangeHnd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [title, setTitle] = useState(data.title);
+    const [description, setDescription] = useState(data.description);
+    const [priority, setPriority] = useState(data.priority);
+    const [status, setStatus] = useState(data.status);
+
+    const onTitleChangeHnd = (e: any) => {
         setTitle(e.target.value);
-    };
+    }
 
-    const onDescriptionChangeHnd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onDescriptionChangeHnd = (e: any) => {
         setDescription(e.target.value);
-    };
+    }
 
-    const onPriorityChangeHnd = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onPriorityChangeHnd = (e: any) => {
         setPriority(e.target.value as "low" | "medium" | "high");
-    };
+    }
 
-    const onStatusChangeHnd = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onStatusChangeHnd = (e: any) => {
         setStatus(e.target.value as "todo" | "doing" | "done");
-    };
+    }
 
-    const onSubmitBtnClickHnd = (e: React.FormEvent) => {
+    const onSubmitBtnClickHnd = (e: any) => {
         e.preventDefault();
-        if (project) {
-            const newStory: IStory = {
-                id: 0,
-                title,
-                description,
-                priority,
-                status,
-                projectId: project.id,
-                ownerId: userId,
-                createdAt: new Date()
-            };
-            onSubmitClickHnd(newStory);
-            onBackBtnClickHnd();
+        const updatedData: IStory = {
+            id: data.id,
+            title: title,
+            description: description,
+            priority: priority,
+            status: status,
+            projectId: data.projectId,
+            ownerId: data.ownerId,
+            createdAt: data.createdAt
         }
-    };
+
+        onUpdateClickHnd(updatedData);
+        onBackBtnClickHnd();
+    }
 
     return (
         <div className="form-container">
-            <h2>Add Story</h2>
+            <h2>Edit Story</h2>
             <form onSubmit={onSubmitBtnClickHnd}>
                 <div>
                     <label>Title</label>
@@ -80,11 +79,11 @@ const AddStory: React.FC<Props> = ({ project, userId, onBackBtnClickHnd, onSubmi
                 </div>
                 <div className="add-project-buttons">
                     <input type="button" value="Back" onClick={onBackBtnClickHnd} />
-                    <input type="submit" value="Add Story" />
+                    <input type="submit" value="Update Story" />
                 </div>
             </form>
         </div>
     );
 };
 
-export default AddStory;
+export default EditStory;
