@@ -2,6 +2,7 @@ import { IProject, PageEnum } from "./Project.type";
 import { IStory } from "./Story.type";
 import "./StoryList.style.css";
 import { useState } from "react";
+import StoryModal from "./StoryModal";
 
 type Props = {
     project: IProject;
@@ -14,10 +15,16 @@ type Props = {
 const StoryList = (props: Props) => {
     const { project, onDeleteClickHnd, onEdit, onPageChange, onBackBtnClickHnd } = props;
     const [showModal, setShowModal] = useState(false);
+    const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
     const viewStory = (story: IStory) => {
+        setSelectedStory(story);
         setShowModal(true);
-        onPageChange(PageEnum.viewStory);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedStory(null);
     };
 
     return (
@@ -59,6 +66,9 @@ const StoryList = (props: Props) => {
                     })}
                 </tbody>
             </table>
+            {showModal && selectedStory && (
+                <StoryModal story={selectedStory} onClose={closeModal} />
+            )}
         </div>
     );
 };

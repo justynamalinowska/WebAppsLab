@@ -16,5 +16,4 @@ export enum PageEnum {
   addStory,    
   editStory,   
   deleteStory,
-  viewStory
 }

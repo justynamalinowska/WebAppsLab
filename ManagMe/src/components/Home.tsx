@@ -130,11 +130,6 @@ const Home = () => {
         }
     };
 
-    const viewStory = (story: IStory) => {
-        setSelectedStory(story);
-        setShownPage(PageEnum.viewStory);
-    };
-
     const backToProjectList = () => {
         setShownPage(PageEnum.list);
     };
