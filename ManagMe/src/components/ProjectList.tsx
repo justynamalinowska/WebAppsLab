@@ -45,7 +45,7 @@ const ProjectList = (props: Props) => {
                                 <td>{project.description}</td>
                                 <td>
                                     <div className="action-buttons">
-                                        <input type="button" value="View" onClick={() => viewProject(project)} /> {/* Przekazujemy projekt do viewProject */}
+                                        <input type="button" value="View" onClick={() => viewProject(project)} /> 
                                         <input type="button" value="Edit" onClick={() => onEdit(project)}/>
                                         <input type="button" value="Delete" onClick={() => onDeleteClickHnd(project)} />
                                         <input type="button" value="Select" onClick={() => onSelect(project)} />
