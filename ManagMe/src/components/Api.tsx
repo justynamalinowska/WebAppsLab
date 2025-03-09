@@ -1,5 +1,4 @@
 import { IProject } from "./Project.type";
-import { IStory } from "./Story.type";
 
 class Api {
   static async getProjects(): Promise<IProject[]> {
@@ -14,10 +13,6 @@ class Api {
 
   static async setCurrentProject(project: IProject): Promise<void> {
     window.localStorage.setItem("currentProject", JSON.stringify(project));
-  }
-
-  static async getStories(projectId: string): Promise<IStory[]> {
-    return [];
   }
 }
 
