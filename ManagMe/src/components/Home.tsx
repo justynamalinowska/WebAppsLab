@@ -36,9 +36,11 @@ const Home = () => {
 
     useEffect(() => {
         if (currentProject) {
-            const allStories = JSON.parse(window.localStorage.getItem("stories") || "[]") as IStory[];
-            const projectStories = allStories.filter(story => story.projectId === currentProject.id);
-            setCurrentProject({ ...currentProject, stories: projectStories });
+            const projects = JSON.parse(window.localStorage.getItem("projects") || "[]") as IProject[];
+            const updatedProject = projects.find(p => p.id === currentProject.id);
+            if (updatedProject) {
+                setCurrentProject(updatedProject);
+            }
         }
     }, [currentProject?.id]);
 
@@ -50,10 +52,10 @@ const Home = () => {
     const _setStoriesList = (data: IStory[]) => {
         if (currentProject) {
             const updatedProject = { ...currentProject, stories: data };
+            const updatedProjects = projectList.map(p => p.id === currentProject.id ? updatedProject : p);
+            setProjectsList(updatedProjects);
             setCurrentProject(updatedProject);
-            const allStories = JSON.parse(window.localStorage.getItem("stories") || "[]") as IStory[];
-            const updatedStories = allStories.filter(story => story.projectId !== currentProject.id).concat(data);
-            window.localStorage.setItem("stories", JSON.stringify(updatedStories));
+            window.localStorage.setItem("projects", JSON.stringify(updatedProjects));
         }
     };
 
@@ -147,7 +149,7 @@ const Home = () => {
             {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
             {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
-            {shownPage === PageEnum.stories && currentProject && (<StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onSelect={addStory} onPageChange={setShownPage} />)}
+            {shownPage === PageEnum.stories && currentProject && (<StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} />)}
             {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />} 
             {/* {shownPage === PageEnum.editStory && <EditStory project={currentProject} story={selectedStory} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />}  */}
             {shownPage === PageEnum.viewStory && <ViewStory story={selectedStory} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} />}

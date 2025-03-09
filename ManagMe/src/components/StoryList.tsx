@@ -7,17 +7,14 @@ type Props = {
     project: IProject;
     onDeleteClickHnd: (data: IStory) => void;
     onEdit: (data: IStory) => void;
-    onSelect: (data: IStory) => void;
     onPageChange: (page: PageEnum) => void;
 };
 
 const StoryList = (props: Props) => {
-    const { project, onDeleteClickHnd, onEdit, onSelect, onPageChange } = props;
+    const { project, onDeleteClickHnd, onEdit, onPageChange } = props;
     const [showModal, setShowModal] = useState(false);
-    const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
     const viewStory = (story: IStory) => {
-        setSelectedStory(story);
         setShowModal(true);
         onPageChange(PageEnum.viewStory);
     };
@@ -60,17 +57,6 @@ const StoryList = (props: Props) => {
                     })}
                 </tbody>
             </table>
-            {showModal && selectedStory && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <span className="close" onClick={() => setShowModal(false)}>&times;</span>
-                        <h2>{selectedStory.title}</h2>
-                        <p>{selectedStory.description}</p>
-                        <p>Priority: {selectedStory.priority}</p>
-                        <p>Status: {selectedStory.status}</p>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
