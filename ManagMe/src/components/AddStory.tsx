@@ -8,31 +8,33 @@ type Props = {
     userId: string;
     onBackBtnClickHnd: () => void;
     onSubmitClickHnd: (data: IStory) => void;
-};
+}
 
-const AddStory: React.FC<Props> = ({ project, userId, onBackBtnClickHnd, onSubmitClickHnd }) => {
+const AddStory = (props: Props) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState<"low" | "medium" | "high">("low");
     const [status, setStatus] = useState<"todo" | "doing" | "done">("todo");
 
-    const onTitleChangeHnd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { project, userId, onBackBtnClickHnd, onSubmitClickHnd } = props;
+
+    const onTitleChangeHnd = (e: any) => {
         setTitle(e.target.value);
-    };
+    }
 
-    const onDescriptionChangeHnd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onDescriptionChangeHnd = (e: any) => {
         setDescription(e.target.value);
-    };
+    }
 
-    const onPriorityChangeHnd = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onPriorityChangeHnd = (e: any) => {
         setPriority(e.target.value as "low" | "medium" | "high");
-    };
+    }
 
-    const onStatusChangeHnd = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onStatusChangeHnd = (e: any) => {
         setStatus(e.target.value as "todo" | "doing" | "done");
-    };
+    }
 
-    const onSubmitBtnClickHnd = (e: React.FormEvent) => {
+    const onSubmitBtnClickHnd = (e: any) => {
         e.preventDefault();
         if (project) {
             const newStory: IStory = {
@@ -47,8 +49,10 @@ const AddStory: React.FC<Props> = ({ project, userId, onBackBtnClickHnd, onSubmi
             };
             onSubmitClickHnd(newStory);
             onBackBtnClickHnd();
+        } else {
+            alert("No project selected. Please select a project first.");
         }
-    };
+    }
 
     return (
         <div className="form-container">

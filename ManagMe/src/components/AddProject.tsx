@@ -25,7 +25,7 @@ const AddProject = (Props: Props) => {
     const onSubmitBtnClickHnd = (e : any) => {
         e.preventDefault();
         const data: IProject = {
-            id: "",
+            id: 0,
             name: name,
             description: description
         }

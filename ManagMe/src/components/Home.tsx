@@ -7,7 +7,10 @@ import EditProject from "./EditProject";
 import { IUser } from "./User.type";
 import Api from "./Api";
 import { IStory } from "./Story.type";
-import StoriesList from "./StoryList";
+import StoryList from "./StoryList";
+import AddStory from "./AddStory";
+import EditStory from "./EditStory";
+import ViewStory from "./ViewStory";
 
 const Home = () => {
     const [projectList, setProjectsList] = useState([] as IProject[]);
@@ -15,7 +18,7 @@ const Home = () => {
     const [dataToEdit, setDataToEdit] = useState({} as IProject);
     const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska" });
     const [currentProject, setCurrentProject] = useState<IProject | null>(null);
-    const [stories, setStories] = useState([] as IStory[]);
+    const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
     const showListPage = () => setShownPage(PageEnum.list);
 
@@ -35,7 +38,7 @@ const Home = () => {
         if (currentProject) {
             const allStories = JSON.parse(window.localStorage.getItem("stories") || "[]") as IStory[];
             const projectStories = allStories.filter(story => story.projectId === currentProject.id);
-            setStories(projectStories);
+            setCurrentProject({ ...currentProject, stories: projectStories });
         }
     }, [currentProject?.id]);
 
@@ -45,14 +48,17 @@ const Home = () => {
     };
 
     const _setStoriesList = (data: IStory[]) => {
-        setStories(data);
-        const allStories = JSON.parse(window.localStorage.getItem("stories") || "[]") as IStory[];
-        const updatedStories = allStories.filter(story => story.projectId !== currentProject?.id).concat(data);
-        window.localStorage.setItem("stories", JSON.stringify(updatedStories));
+        if (currentProject) {
+            const updatedProject = { ...currentProject, stories: data };
+            setCurrentProject(updatedProject);
+            const allStories = JSON.parse(window.localStorage.getItem("stories") || "[]") as IStory[];
+            const updatedStories = allStories.filter(story => story.projectId !== currentProject.id).concat(data);
+            window.localStorage.setItem("stories", JSON.stringify(updatedStories));
+        }
     };
 
     const generateUniqueId = (): number => {
-        const ids = projectList.flatMap(project => (project.stories || []).map(story => parseInt(story.id, 10)));
+        const ids = projectList.flatMap(project => (project.stories || []).map(story => story.id));
         return ids.length > 0 ? Math.max(...ids) + 1 : 1;
     };
 
@@ -101,6 +107,8 @@ const Home = () => {
         if (currentProject) {
             const updatedStories = (currentProject.stories || []).map(s => s.id === story.id ? story : s);
             _setStoriesList(updatedStories);
+            setSelectedStory(story);
+            setShownPage(PageEnum.editStory);
         }
     };
 
@@ -108,14 +116,22 @@ const Home = () => {
         if (currentProject) {
             const updatedStories = (currentProject.stories || []).filter(s => s.id !== story.id);
             _setStoriesList(updatedStories);
+            setShownPage(PageEnum.deleteStory);
         }
     };
 
     const addStory = (story: IStory) => {
         if (currentProject) {
-            const newStory = { ...story, id: generateUniqueId().toString(), projectId: currentProject.id };
-            _setStoriesList([...(currentProject.stories || []), newStory]);
+            const newStory = { ...story, id: generateUniqueId(), projectId: currentProject.id };
+            const updatedStories = [...(currentProject.stories || []), newStory];
+            _setStoriesList(updatedStories);
+            setShownPage(PageEnum.stories);
         }
+    };
+
+    const viewStory = (story: IStory) => {
+        setSelectedStory(story);
+        setShownPage(PageEnum.viewStory);
     };
 
     return (
@@ -131,7 +147,10 @@ const Home = () => {
             {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
             {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
             {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
-            {shownPage === PageEnum.stories && currentProject && (<StoriesList project={currentProject} list={stories} onEdit={editStory} onDeleteClickHnd={deleteStory} onSelect={addStory} />)}
+            {shownPage === PageEnum.stories && currentProject && (<StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onSelect={addStory} onPageChange={setShownPage} />)}
+            {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />} 
+            {/* {shownPage === PageEnum.editStory && <EditStory project={currentProject} story={selectedStory} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />}  */}
+            {shownPage === PageEnum.viewStory && <ViewStory story={selectedStory} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} />}
         </section>
     </>);
 };

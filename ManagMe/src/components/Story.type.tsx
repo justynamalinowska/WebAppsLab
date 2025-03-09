@@ -1,6 +1,6 @@
 export interface IStory {
-    id: string;
-    name: string;
+    id: number;
+    title: string;
     description: string;
     priority: "low" | "medium" | "high";
     projectId: number;

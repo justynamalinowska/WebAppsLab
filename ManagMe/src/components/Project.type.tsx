@@ -5,11 +5,16 @@ export interface IProject {
   name: string;
   description: string;
   stories?: IStory[];
+  ownerId?: string;
 }
 
 export enum PageEnum {
   list,
   add, 
   edit,
-  stories
+  stories,
+  addStory,    
+  editStory,   
+  deleteStory,
+  viewStory
 }
