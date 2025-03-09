@@ -49,7 +49,7 @@ const StoryList = (props: Props) => {
                                     <div className="action-buttons">
                                         <input type="button" value="View" onClick={() => viewStory(story)} />
                                         <input type="button" value="Edit" onClick={() => { onEdit(story); onPageChange(PageEnum.editStory); }} />
-                                        <input type="button" value="Delete" onClick={() => { onDeleteClickHnd(story); onPageChange(PageEnum.deleteStory); }} />
+                                        <input type="button" value="Delete" onClick={() => onDeleteClickHnd(story)} />
                                     </div>
                                 </td>
                             </tr>

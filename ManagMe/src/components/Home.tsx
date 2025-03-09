@@ -10,7 +10,6 @@ import { IStory } from "./Story.type";
 import StoryList from "./StoryList";
 import AddStory from "./AddStory";
 import EditStory from "./EditStory";
-import ViewStory from "./ViewStory";
 
 const Home = () => {
     const [projectList, setProjectsList] = useState([] as IProject[]);
@@ -118,7 +117,7 @@ const Home = () => {
         if (currentProject) {
             const updatedStories = (currentProject.stories || []).filter(s => s.id !== story.id);
             _setStoriesList(updatedStories);
-            setShownPage(PageEnum.deleteStory);
+            setShownPage(PageEnum.stories);
         }
     };
 
@@ -152,7 +151,6 @@ const Home = () => {
             {shownPage === PageEnum.stories && currentProject && (<StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} />)}
             {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />} 
             {shownPage === PageEnum.editStory && <EditStory data={selectedStory!} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />} 
-            {shownPage === PageEnum.viewStory && <ViewStory story={selectedStory} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} />}
         </section>
     </>);
 };
