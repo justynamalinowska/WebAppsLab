@@ -8,10 +8,11 @@ type Props = {
     onDeleteClickHnd: (data: IStory) => void;
     onEdit: (data: IStory) => void;
     onPageChange: (page: PageEnum) => void;
+    onBackBtnClickHnd: () => void;
 };
 
 const StoryList = (props: Props) => {
-    const { project, onDeleteClickHnd, onEdit, onPageChange } = props;
+    const { project, onDeleteClickHnd, onEdit, onPageChange, onBackBtnClickHnd } = props;
     const [showModal, setShowModal] = useState(false);
 
     const viewStory = (story: IStory) => {
@@ -23,6 +24,7 @@ const StoryList = (props: Props) => {
         <div>
             <div className="stories-header">
                 <h2>{project.name}</h2>
+                <input type="button" value="Back" onClick={onBackBtnClickHnd} />
                 <input type="button" value="Add Story" onClick={() => onPageChange(PageEnum.addStory)} />
             </div>
             <table className="styled-table">
