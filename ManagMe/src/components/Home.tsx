@@ -58,9 +58,17 @@ const Home = () => {
         }
     };
 
-    const generateUniqueId = (): number => {
-        const ids = projectList.flatMap(project => (project.stories || []).map(story => story.id));
+    const generateUniqueProjectId = (): number => {
+        const ids = projectList.map(project => project.id);
         return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+    };
+
+    const generateUniqueStoryId = (): number => {
+        if (currentProject) {
+            const ids = (currentProject.stories || []).map(story => story.id);
+            return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+        }
+        return 1;
     };
 
     useEffect(() => {
@@ -71,7 +79,7 @@ const Home = () => {
     }, []);
 
     const addProjectHnd = (data: IProject) => {
-        const newProject = { ...data, id: generateUniqueId(), stories: [] };
+        const newProject = { ...data, id: generateUniqueProjectId(), stories: [] };
         _setProjectsList([...projectList, newProject]);
         showListPage();
     }
@@ -123,7 +131,7 @@ const Home = () => {
 
     const addStory = (story: IStory) => {
         if (currentProject) {
-            const newStory = { ...story, id: generateUniqueId(), projectId: currentProject.id };
+            const newStory = { ...story, id: generateUniqueStoryId(), projectId: currentProject.id };
             const updatedStories = [...(currentProject.stories || []), newStory];
             _setStoriesList(updatedStories);
             setShownPage(PageEnum.stories);
