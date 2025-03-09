@@ -16,6 +16,7 @@ const StoryList = (props: Props) => {
     const { project, onDeleteClickHnd, onEdit, onPageChange, onBackBtnClickHnd } = props;
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
+    const [filterStatus, setFilterStatus] = useState<"all" | "todo" | "doing" | "done">("all");
 
     const viewStory = (story: IStory) => {
         setSelectedStory(story);
@@ -27,10 +28,24 @@ const StoryList = (props: Props) => {
         setSelectedStory(null);
     };
 
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setFilterStatus(e.target.value as "all" | "todo" | "doing" | "done");
+    };
+
+    const filteredStories = project.stories?.filter(story => 
+        filterStatus === "all" || story.status === filterStatus
+    );
+
     return (
         <div>
             <div className="stories-header">
                 <h2>{project.name}</h2>
+                <select className="custom-select" value={filterStatus} onChange={handleStatusChange}>
+                    <option value="all">All</option>
+                    <option value="todo">To Do</option>
+                    <option value="doing">Doing</option>
+                    <option value="done">Done</option>
+                </select>
                 <input type="button" value="Back" onClick={onBackBtnClickHnd} />
                 <input type="button" value="Add Story" onClick={() => onPageChange(PageEnum.addStory)} />
             </div>
@@ -46,7 +61,7 @@ const StoryList = (props: Props) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {project.stories && project.stories.map((story) => {
+                    {filteredStories && filteredStories.map((story) => {
                         return (
                             <tr key={story.id}>
                                 <td>{story.id}</td>
