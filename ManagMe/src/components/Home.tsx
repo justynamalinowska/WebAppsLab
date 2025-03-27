@@ -4,7 +4,7 @@ import { IProject, PageEnum } from "./Project.type";
 import ProjectList from "./ProjectList";
 import AddProject from "./AddProject";
 import EditProject from "./EditProject";
-import { IUser } from "./User.type";
+import IUser from "./User.type";
 import Api from "./Api";
 import { IStory } from "./Story.type";
 import StoryList from "./StoryList";
@@ -15,7 +15,7 @@ const Home = () => {
     const [projectList, setProjectsList] = useState([] as IProject[]);
     const [shownPage, setShownPage] = useState(PageEnum.list);
     const [dataToEdit, setDataToEdit] = useState({} as IProject);
-    const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska" });
+    const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska", Role: "Admin" });
     const [currentProject, setCurrentProject] = useState<IProject | null>(null);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
