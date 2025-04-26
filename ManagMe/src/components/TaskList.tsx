@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ITask } from "./Task.type";
 import AddTask from "./AddTask";
 import EditTask from "./EditTask";
@@ -15,7 +15,7 @@ type Props = {
   onBackBtnClickHnd: () => void;
 };
 
-const TaskList = ({ story, tasks, setTasks, onEditTask, onDeleteTask, onShowDetails, onBackBtnClickHnd }: Props) => {
+const TaskList = ({ story, tasks, setTasks, onBackBtnClickHnd }: Props) => {
   const [showAdd, setShowAdd] = useState(false);
   const [editTask, setEditTask] = useState<ITask | null>(null);
   const [detailsTask, setDetailsTask] = useState<ITask | null>(null);
