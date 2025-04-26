@@ -1,4 +1,3 @@
-import React from "react";
 import { ITask } from "./Task.type";
 
 type Props = {
