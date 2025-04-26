@@ -7,9 +7,14 @@ import EditProject from "./EditProject";
 import IUser from "./User.type";
 import Api from "./Api";
 import { IStory } from "./Story.type";
+import { ITask } from "./Task.type";
 import StoryList from "./StoryList";
 import AddStory from "./AddStory";
 import EditStory from "./EditStory";
+import TaskList from "./TaskList";
+import AddTask from "./AddTask";
+import EditTask from "./EditTask";
+import TaskDetails from "./TaskDetails";
 
 const Home = () => {
     const [projectList, setProjectsList] = useState([] as IProject[]);
@@ -18,8 +23,17 @@ const Home = () => {
     const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska", Role: "Admin" });
     const [currentProject, setCurrentProject] = useState<IProject | null>(null);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
+    const [tasks, setTasks] = useState<ITask[]>([]);
+    const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+    const [currentStory, setCurrentStory] = useState<IStory | null>(null);
+
 
     const showListPage = () => setShownPage(PageEnum.list);
+
+    const generateUniqueTaskId = (): number => {
+        const ids = tasks.map(task => task.id);
+        return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+    };
 
     useEffect(() => {
         Api.getProjects().then(setProjectsList);
@@ -143,6 +157,35 @@ const Home = () => {
         setShownPage(PageEnum.list);
     };
 
+    const backToTaskList = () => {
+        setShownPage(PageEnum.tasks);
+    };
+
+    const addTask = (task: ITask) => {
+        setTasks([...tasks, { ...task, id: generateUniqueTaskId(), storyId: currentStory!.id }]);
+        setShownPage(PageEnum.tasks);
+    };
+    
+    const editTaskHnd = (task: ITask) => {
+        setTasks(tasks.map(t => t.id === task.id ? task : t));
+        setShownPage(PageEnum.tasks);
+    };
+    
+    const deleteTask = (task: ITask) => {
+        setTasks(tasks.filter(t => t.id !== task.id));
+        setShownPage(PageEnum.tasks);
+    };
+    
+    const goToTaskList = (story: IStory) => {
+        setCurrentStory(story);
+        setShownPage(PageEnum.tasks);
+    };
+
+    const selectStory = (story: IStory) => {
+        setCurrentStory(story); // Set the selected story
+        setShownPage(PageEnum.tasks); // Navigate to the tasks page
+    };
+
     return (
     <> 
         <article className="article-header">
@@ -153,12 +196,16 @@ const Home = () => {
         </article>
 
         <section className="section-content-projects">
-            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
-            {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
-            {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
-            {shownPage === PageEnum.stories && currentProject && (<StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} onBackBtnClickHnd={backToProjectList}/>)}
-            {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />} 
-            {shownPage === PageEnum.editStory && <EditStory data={selectedStory!} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />} 
+        {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject} />}
+        {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd} />}
+        {shownPage === PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData} />}
+        {shownPage === PageEnum.stories && currentProject && <StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} onBackBtnClickHnd={backToProjectList} onSelectStory={selectStory} />}
+        {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />}
+        {shownPage === PageEnum.editStory && <EditStory data={selectedStory!} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />}
+        {shownPage === PageEnum.tasks && currentStory && <TaskList story={currentStory} tasks={tasks} setTasks={setTasks} onEditTask={task => { setSelectedTask(task); setShownPage(PageEnum.editTask); }} onDeleteTask={deleteTask} onShowDetails={task => { setSelectedTask(task); setShownPage(PageEnum.tasks); }} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} />}
+        {shownPage === PageEnum.addTask && currentStory && <AddTask storyId={currentStory.id} onAdd={addTask} onBackBtnClickHnd={backToTaskList} />}
+        {shownPage === PageEnum.editTask && selectedTask && <EditTask task={selectedTask} onEdit={editTaskHnd} onBackBtnClickHnd={backToTaskList} />}
+        {shownPage === PageEnum.tasks && selectedTask && <TaskDetails task={selectedTask} onBackBtnClickHnd={backToTaskList} />}
         </section>
     </>);
 };

@@ -16,4 +16,7 @@ export enum PageEnum {
   addStory,    
   editStory,   
   deleteStory,
+  tasks,       
+  addTask,      
+  editTask 
 }

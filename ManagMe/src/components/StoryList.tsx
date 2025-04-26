@@ -10,10 +10,11 @@ type Props = {
     onEdit: (data: IStory) => void;
     onPageChange: (page: PageEnum) => void;
     onBackBtnClickHnd: () => void;
+    onSelectStory: (story: IStory) => void; // Ensure this prop is passed
 };
 
 const StoryList = (props: Props) => {
-    const { project, onDeleteClickHnd, onEdit, onPageChange, onBackBtnClickHnd } = props;
+    const { project, onDeleteClickHnd, onEdit, onPageChange, onBackBtnClickHnd, onSelectStory } = props;
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
     const [filterStatus, setFilterStatus] = useState<"all" | "todo" | "doing" | "done">("all");
@@ -74,6 +75,10 @@ const StoryList = (props: Props) => {
                                         <input type="button" value="View" onClick={() => viewStory(story)} />
                                         <input type="button" value="Edit" onClick={() => { onEdit(story); onPageChange(PageEnum.editStory); }} />
                                         <input type="button" value="Delete" onClick={() => onDeleteClickHnd(story)} />
+                                        <input type="button" value="Select" onClick={() => { 
+                                            onSelectStory(story); 
+                                            onPageChange(PageEnum.tasks); // Navigate to tasks page
+                                        }} />
                                     </div>
                                 </td>
                             </tr>

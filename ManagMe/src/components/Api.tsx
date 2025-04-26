@@ -1,4 +1,5 @@
 import { IProject } from "./Project.type";
+import { ITask } from "./Task.type";
 
 class Api {
   static async getProjects(): Promise<IProject[]> {
