@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { ITask } from "./Task.type";
-import AddTask from "./AddTask";
-import EditTask from "./EditTask";
-import TaskDetails from "./TaskDetails";
 import { IStory } from "./Story.type";
+import "./TaskList.style.css";
+import { useState } from "react";
+import TaskModal from "./TaskModal";
 
 type Props = {
   story: IStory;
@@ -11,59 +10,68 @@ type Props = {
   setTasks: (tasks: ITask[]) => void;
   onEditTask: (task: ITask) => void;
   onDeleteTask: (task: ITask) => void;
-  onShowDetails: (task: ITask) => void;
   onBackBtnClickHnd: () => void;
+  onAddTask: () => void;
 };
 
-const TaskList = ({ story, tasks, setTasks, onBackBtnClickHnd }: Props) => {
-  const [showAdd, setShowAdd] = useState(false);
-  const [editTask, setEditTask] = useState<ITask | null>(null);
-  const [detailsTask, setDetailsTask] = useState<ITask | null>(null);
+const TaskList = ({ story, tasks, onEditTask, onDeleteTask, onBackBtnClickHnd, onAddTask }: Props) => {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
 
-  const handleDelete = (id: number) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const handleShowDetails = (task: ITask) => {
+    setSelectedTask(task);
+    setShowModal(true);
   };
 
+  const handleCloseModal = () => {
+    setSelectedTask(null);
+    setShowModal(false);
+  };
+
+  const filteredTasks = tasks.filter(task => task.storyId === story.id);
+
   return (
-    <div>
-      <button onClick={onBackBtnClickHnd}>Back to Stories</button>
-      <h2>Tasks for Story {story.title}</h2>
-      <button onClick={() => setShowAdd(true)}>Add Task</button>
-      <ul>
-        {tasks.filter(task => task.storyId === story.id).map(task => (
-          <li key={task.id}>
-            {task.name}
-            <button onClick={() => setDetailsTask(task)}>Details</button>
-            <button onClick={() => setEditTask(task)}>Edit</button>
-            <button onClick={() => handleDelete(task.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      {showAdd && (
-        <AddTask
-          storyId={story.id}
-          onAdd={task => {
-            setTasks([...tasks, task]);
-            setShowAdd(false);
-          }}
-          onBackBtnClickHnd={() => setShowAdd(false)}
-        />
-      )}
-      {editTask && (
-        <EditTask
-          task={editTask}
-          onEdit={task => {
-            setTasks(tasks.map(t => t.id === task.id ? task : t));
-            setEditTask(null);
-          }}
-          onBackBtnClickHnd={() => setEditTask(null)}
-        />
-      )}
-      {detailsTask && (
-        <TaskDetails
-          task={detailsTask}
-          onBackBtnClickHnd={() => setDetailsTask(null)}
-        />
+    <div className="task-list-container">
+      <div className="tasks-header">
+        <h2>Tasks for Story: {story.title}</h2>
+        <div className="task-actions">
+          <button onClick={onBackBtnClickHnd}>Back</button>
+          <button onClick={onAddTask}>Add Task</button>
+        </div>
+      </div>
+      <table className="styled-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Priority</th>
+            <th>Estimated Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTasks.map(task => (
+            <tr key={task.id}>
+              <td>{task.name}</td>
+              <td>{task.description}</td>
+              <td>{task.priority}</td>
+              <td>{task.estimatedTime} hours</td>
+              <td>{task.status}</td>
+              <td>
+                <div className="action-buttons">
+                  <button onClick={() => handleShowDetails(task)}>Details</button>
+                  <button onClick={() => onEditTask(task)}>Edit</button>
+                  <button onClick={() => onDeleteTask(task)}>Delete</button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {filteredTasks.length === 0 && <p>No tasks available for this story.</p>}
+      {showModal && selectedTask && (
+        <TaskModal task={selectedTask} onClose={handleCloseModal} />
       )}
     </div>
   );

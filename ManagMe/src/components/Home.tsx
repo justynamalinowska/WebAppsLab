@@ -14,7 +14,6 @@ import EditStory from "./EditStory";
 import TaskList from "./TaskList";
 import AddTask from "./AddTask";
 import EditTask from "./EditTask";
-import TaskDetails from "./TaskDetails";
 
 const Home = () => {
     const [projectList, setProjectsList] = useState([] as IProject[]);
@@ -27,7 +26,6 @@ const Home = () => {
     const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
     const [currentStory, setCurrentStory] = useState<IStory | null>(null);
 
-
     const showListPage = () => setShownPage(PageEnum.list);
 
     const generateUniqueTaskId = (): number => {
@@ -36,7 +34,11 @@ const Home = () => {
     };
 
     useEffect(() => {
-        Api.getProjects().then(setProjectsList);
+        Api.getCurrentStory().then(story => {
+            if (story) {
+                setCurrentStory(story);
+            }
+        });
     }, []);
 
     useEffect(() => {
@@ -154,6 +156,7 @@ const Home = () => {
 
     const backToProjectList = () => {
         Api.setCurrentProject({} as IProject);
+        Api.clearCurrentStory(); 
         setShownPage(PageEnum.list);
     };
 
@@ -162,8 +165,9 @@ const Home = () => {
     };
 
     const addTask = (task: ITask) => {
-        setTasks([...tasks, { ...task, id: generateUniqueTaskId(), storyId: currentStory!.id }]);
-        setShownPage(PageEnum.tasks);
+        const updatedTasks = [...tasks, task];
+        _setTasksList(updatedTasks); 
+        setShownPage(PageEnum.tasks); 
     };
     
     const editTaskHnd = (task: ITask) => {
@@ -175,17 +179,22 @@ const Home = () => {
         setTasks(tasks.filter(t => t.id !== task.id));
         setShownPage(PageEnum.tasks);
     };
-    
-    const goToTaskList = (story: IStory) => {
-        setCurrentStory(story);
+
+    const selectStory = (story: IStory) => {
+        setCurrentStory(story); 
+        Api.setCurrentStory(story); 
         setShownPage(PageEnum.tasks);
     };
 
-    const selectStory = (story: IStory) => {
-        setCurrentStory(story); // Set the selected story
-        setShownPage(PageEnum.tasks); // Navigate to the tasks page
+    useEffect(() => {
+        Api.getTasks().then(setTasks);
+    }, []);
+    
+    const _setTasksList = (data: ITask[]) => {
+        setTasks(data);
+        Api.setTasks(data); 
     };
-
+    
     return (
     <> 
         <article className="article-header">
@@ -202,10 +211,9 @@ const Home = () => {
         {shownPage === PageEnum.stories && currentProject && <StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} onBackBtnClickHnd={backToProjectList} onSelectStory={selectStory} />}
         {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />}
         {shownPage === PageEnum.editStory && <EditStory data={selectedStory!} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />}
-        {shownPage === PageEnum.tasks && currentStory && <TaskList story={currentStory} tasks={tasks} setTasks={setTasks} onEditTask={task => { setSelectedTask(task); setShownPage(PageEnum.editTask); }} onDeleteTask={deleteTask} onShowDetails={task => { setSelectedTask(task); setShownPage(PageEnum.tasks); }} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} />}
+        {shownPage === PageEnum.tasks && currentStory && <TaskList story={currentStory} tasks={tasks} setTasks={setTasks} onEditTask={task => { setSelectedTask(task); setShownPage(PageEnum.editTask); }} onDeleteTask={deleteTask} onShowDetails={task => { setSelectedTask(task); setShownPage(PageEnum.tasks); }} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onAddTask={() => setShownPage(PageEnum.addTask)} />}
         {shownPage === PageEnum.addTask && currentStory && <AddTask storyId={currentStory.id} onAdd={addTask} onBackBtnClickHnd={backToTaskList} />}
         {shownPage === PageEnum.editTask && selectedTask && <EditTask task={selectedTask} onEdit={editTaskHnd} onBackBtnClickHnd={backToTaskList} />}
-        {shownPage === PageEnum.tasks && selectedTask && <TaskDetails task={selectedTask} onBackBtnClickHnd={backToTaskList} />}
         </section>
     </>);
 };

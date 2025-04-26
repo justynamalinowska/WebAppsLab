@@ -17,7 +17,7 @@ const AddTask = ({ storyId, onAdd, onBackBtnClickHnd }: Props) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd({
-      id: Date.now(), // Generate a unique ID
+      id: 0, 
       name,
       description,
       priority,

@@ -1,5 +1,5 @@
 import { ITask } from "./Task.type";
-import "./ProjectModal.style.css"; 
+import "./TaskModal.style.css"; 
 
 type TaskModalProps = {
   task: ITask;
@@ -9,12 +9,12 @@ type TaskModalProps = {
 const TaskModal = ({ task, onClose }: TaskModalProps) => {
   return (
     <div id="myModal" className="modal">
-      <div className="modal-content">
+        <div className="modal-content">
         <h3>{task.name}</h3>
-        <p><strong>Description:</strong> {task.description}</p>
-        <p><strong>Priority:</strong> {task.priority}</p>
-        <p><strong>Estimated Time:</strong> {task.estimatedTime} hours</p>
-        <p><strong>Status:</strong> {task.status}</p>
+        <p>Description:{task.description}</p>
+        <p>Priority:{task.priority}</p>
+        <p>Estimated Time:{task.estimatedTime} hours</p>
+        <p>Status:{task.status}</p>
         <button onClick={onClose}>Close</button>
       </div>
     </div>

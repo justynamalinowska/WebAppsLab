@@ -30,7 +30,6 @@ const ProjectList = (props: Props) => {
             <table className="styled-table">
                 <thead>
                     <tr>
-                        <th>Id</th>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Actions</th>
@@ -40,7 +39,6 @@ const ProjectList = (props: Props) => {
                     {list.map((project) => {
                         return (
                             <tr key={project.id}>
-                                <td>{project.id}</td>
                                 <td>{project.name}</td>
                                 <td>{project.description}</td>
                                 <td>

@@ -10,7 +10,7 @@ type Props = {
     onEdit: (data: IStory) => void;
     onPageChange: (page: PageEnum) => void;
     onBackBtnClickHnd: () => void;
-    onSelectStory: (story: IStory) => void; // Ensure this prop is passed
+    onSelectStory: (story: IStory) => void; 
 };
 
 const StoryList = (props: Props) => {
@@ -53,7 +53,6 @@ const StoryList = (props: Props) => {
             <table className="styled-table">
                 <thead>
                     <tr>
-                        <th>Id</th>
                         <th>Title</th>
                         <th>Description</th>
                         <th>Priority</th>
@@ -65,7 +64,6 @@ const StoryList = (props: Props) => {
                     {filteredStories && filteredStories.map((story) => {
                         return (
                             <tr key={story.id}>
-                                <td>{story.id}</td>
                                 <td>{story.title}</td>
                                 <td>{story.description}</td>
                                 <td>{story.priority}</td>
@@ -86,6 +84,7 @@ const StoryList = (props: Props) => {
                     })}
                 </tbody>
             </table>
+            {filteredStories && filteredStories.length === 0 && <p>No stories available.</p>}
             {showModal && selectedStory && (
                 <StoryModal story={selectedStory} onClose={closeModal} />
             )}
