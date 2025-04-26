@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ITask } from "./Task.type";
+import "./TaskList.style.css";
 
 type Props = {
   task: ITask;
@@ -25,25 +26,54 @@ const EditTask = ({ task, onEdit, onBackBtnClickHnd }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Edit Task</h3>
-      <input value={name} onChange={e => setName(e.target.value)} required />
-      <textarea value={description} onChange={e => setDescription(e.target.value)} required />
-      <select value={priority} onChange={e => setPriority(e.target.value as any)}>
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </select>
-      <input
-        type="number"
-        min={1}
-        value={estimatedTime}
-        onChange={e => setEstimatedTime(Number(e.target.value))}
-        required
-      />
-      <button type="button" onClick={onBackBtnClickHnd}>Back</button>
-      <button type="submit">Save</button>
-    </form>
+    <div className="task-form-container">
+      <h2>Edit Task</h2>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="name">Name</label>
+        <input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter task name"
+          required
+        />
+        <label htmlFor="description">Description</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Enter task description"
+          required
+        />
+        <label htmlFor="priority">Priority</label>
+        <select
+          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high")}
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <label htmlFor="estimatedTime">Estimated Time (hours)</label>
+        <input
+          id="estimatedTime"
+          type="number"
+          min={1}
+          value={estimatedTime}
+          onChange={(e) => setEstimatedTime(Number(e.target.value))}
+          placeholder="Enter estimated time"
+          required
+        />
+        <div className="add-project-buttons">
+          <button type="button" onClick={onBackBtnClickHnd}>
+            Back
+          </button>
+          <button type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
   );
 };
 
