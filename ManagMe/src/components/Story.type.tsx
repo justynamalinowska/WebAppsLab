@@ -1,3 +1,5 @@
+import { ITask } from "./Task.type";
+
 export interface IStory {
     id: number;
     title: string;
@@ -7,4 +9,5 @@ export interface IStory {
     createdAt: Date;
     status: "todo" | "doing" | "done";
     ownerId: string;
+    tasks: ITask[];
   }

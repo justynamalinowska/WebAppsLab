@@ -12,6 +12,7 @@ type Props = {
   onDeleteTask: (task: ITask) => void;
   onBackBtnClickHnd: () => void;
   onAddTask: () => void;
+  onShowDetails: (task: ITask) => void;
 };
 
 const TaskList = ({ story, tasks, onEditTask, onDeleteTask, onBackBtnClickHnd, onAddTask }: Props) => {
