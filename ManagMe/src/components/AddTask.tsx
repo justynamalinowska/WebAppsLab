@@ -17,7 +17,7 @@ const AddTask = ({ storyId, onAdd, onBackBtnClickHnd }: Props) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd({
-      id: 0, 
+      id: 0,
       name,
       description,
       priority,

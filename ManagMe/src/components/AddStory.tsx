@@ -45,7 +45,8 @@ const AddStory = (props: Props) => {
                 status,
                 projectId: project.id,
                 ownerId: userId,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tasks: []
             };
             onSubmitClickHnd(newStory);
             onBackBtnClickHnd();

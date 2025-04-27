@@ -28,11 +28,6 @@ const Home = () => {
 
     const showListPage = () => setShownPage(PageEnum.list);
 
-    const generateUniqueTaskId = (): number => {
-        const ids = tasks.map(task => task.id);
-        return ids.length > 0 ? Math.max(...ids) + 1 : 1;
-    };
-
     useEffect(() => {
         Api.getCurrentStory().then(story => {
             if (story) {
@@ -82,6 +77,14 @@ const Home = () => {
     const generateUniqueStoryId = (): number => {
         if (currentProject) {
             const ids = (currentProject.stories || []).map(story => story.id);
+            return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+        }
+        return 1;
+    };
+
+    const generateUniqueTaskId = (): number => {
+        if(currentStory) {
+            const ids = tasks.map(task => task.id);
             return ids.length > 0 ? Math.max(...ids) + 1 : 1;
         }
         return 1;
@@ -141,6 +144,10 @@ const Home = () => {
         if (currentProject) {
             const updatedStories = (currentProject.stories || []).filter(s => s.id !== story.id);
             _setStoriesList(updatedStories);
+    
+            const updatedTasks = tasks.filter(task => task.storyId !== story.id);
+            _setTasksList(updatedTasks);
+    
             setShownPage(PageEnum.stories);
         }
     };
@@ -165,7 +172,8 @@ const Home = () => {
     };
 
     const addTask = (task: ITask) => {
-        const updatedTasks = [...tasks, task];
+        const newTask = { ...task, id: generateUniqueTaskId() }; 
+        const updatedTasks = [...tasks, newTask];
         _setTasksList(updatedTasks); 
         setShownPage(PageEnum.tasks); 
     };

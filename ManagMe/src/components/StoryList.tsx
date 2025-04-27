@@ -75,7 +75,7 @@ const StoryList = (props: Props) => {
                                         <input type="button" value="Delete" onClick={() => onDeleteClickHnd(story)} />
                                         <input type="button" value="Select" onClick={() => { 
                                             onSelectStory(story); 
-                                            onPageChange(PageEnum.tasks); // Navigate to tasks page
+                                            onPageChange(PageEnum.tasks); 
                                         }} />
                                     </div>
                                 </td>
