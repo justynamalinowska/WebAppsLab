@@ -171,21 +171,79 @@ const Home = () => {
         setShownPage(PageEnum.tasks);
     };
 
-    const addTask = (task: ITask) => {
-        const newTask = { ...task, id: generateUniqueTaskId() }; 
-        const updatedTasks = [...tasks, newTask];
-        _setTasksList(updatedTasks); 
-        setShownPage(PageEnum.tasks); 
+    const addTask = (task: Omit<ITask, "id">) => {
+        if (currentStory && currentProject) {
+            const newTask = { ...task, id: generateUniqueTaskId() };
+    
+            // Zaktualizuj zadania w bieżącej historii
+            const updatedTasks = [...(currentStory.tasks || []), newTask];
+            const updatedStory = { ...currentStory, tasks: updatedTasks };
+            setCurrentStory(updatedStory); // Aktualizuj currentStory
+    
+            // Zaktualizuj historie w projekcie
+            const updatedStories = (currentProject.stories ?? []).map(story =>
+                story.id === currentStory.id ? updatedStory : story
+            );
+            const updatedProject = { ...currentProject, stories: updatedStories };
+            setCurrentProject(updatedProject);
+    
+            // Zapisz zmiany w localStorage
+            const updatedProjects = projectList.map(p =>
+                p.id === currentProject.id ? updatedProject : p
+            );
+            setProjectsList(updatedProjects);
+            window.localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    
+            setShownPage(PageEnum.tasks);
+        }
     };
     
     const editTaskHnd = (task: ITask) => {
-        setTasks(tasks.map(t => t.id === task.id ? task : t));
-        setShownPage(PageEnum.tasks);
+        if (currentStory && currentProject) {
+            const updatedTasks = currentStory.tasks.map(t => t.id === task.id ? task : t);
+            const updatedStory = { ...currentStory, tasks: updatedTasks };
+            setCurrentStory(updatedStory); // Aktualizuj currentStory
+    
+            // Zaktualizuj historie w projekcie
+            const updatedStories = (currentProject.stories ?? []).map(story =>
+                story.id === currentStory.id ? updatedStory : story
+            );
+            const updatedProject = { ...currentProject, stories: updatedStories };
+            setCurrentProject(updatedProject);
+    
+            // Zapisz zmiany w localStorage
+            const updatedProjects = projectList.map(p =>
+                p.id === currentProject.id ? updatedProject : p
+            );
+            setProjectsList(updatedProjects);
+            window.localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    
+            setShownPage(PageEnum.tasks);
+        }
     };
     
     const deleteTask = (task: ITask) => {
-        setTasks(tasks.filter(t => t.id !== task.id));
-        setShownPage(PageEnum.tasks);
+        if (currentStory && currentProject) {
+            const updatedTasks = currentStory.tasks.filter(t => t.id !== task.id);
+            const updatedStory = { ...currentStory, tasks: updatedTasks };
+            setCurrentStory(updatedStory); // Aktualizuj currentStory
+    
+            // Zaktualizuj historie w projekcie
+            const updatedStories = (currentProject.stories ?? []).map(story =>
+                story.id === currentStory.id ? updatedStory : story
+            );
+            const updatedProject = { ...currentProject, stories: updatedStories };
+            setCurrentProject(updatedProject);
+    
+            // Zapisz zmiany w localStorage
+            const updatedProjects = projectList.map(p =>
+                p.id === currentProject.id ? updatedProject : p
+            );
+            setProjectsList(updatedProjects);
+            window.localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    
+            setShownPage(PageEnum.tasks);
+        }
     };
 
     const selectStory = (story: IStory) => {
@@ -219,7 +277,24 @@ const Home = () => {
         {shownPage === PageEnum.stories && currentProject && <StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} onBackBtnClickHnd={backToProjectList} onSelectStory={selectStory} />}
         {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />}
         {shownPage === PageEnum.editStory && <EditStory data={selectedStory!} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />}
-        {shownPage === PageEnum.tasks && currentStory && <TaskList story={currentStory} tasks={tasks} setTasks={setTasks} onEditTask={task => { setSelectedTask(task); setShownPage(PageEnum.editTask); }} onDeleteTask={deleteTask} onShowDetails={task => { setSelectedTask(task); setShownPage(PageEnum.tasks); }} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onAddTask={() => setShownPage(PageEnum.addTask)} />}
+        {shownPage === PageEnum.tasks && currentStory && (
+            <TaskList
+            story={currentStory}
+            tasks={tasks}
+            setTasks={(tasks: ITask[]) => setTasks(tasks)}
+            onEditTask={(task: ITask) => {
+                setSelectedTask(task);
+                setShownPage(PageEnum.editTask);
+            }}
+            onDeleteTask={(task: ITask) => deleteTask(task)}
+            onShowDetails={(task: ITask) => {
+                setSelectedTask(task);
+                setShownPage(PageEnum.tasks);
+            }}
+            onBackBtnClickHnd={() => setShownPage(PageEnum.stories)}
+            onAddTask={() => setShownPage(PageEnum.addTask)}
+            />
+        )}
         {shownPage === PageEnum.addTask && currentStory && <AddTask storyId={currentStory.id} onAdd={addTask} onBackBtnClickHnd={backToTaskList} />}
         {shownPage === PageEnum.editTask && selectedTask && <EditTask task={selectedTask} onEdit={editTaskHnd} onBackBtnClickHnd={backToTaskList} />}
         </section>
