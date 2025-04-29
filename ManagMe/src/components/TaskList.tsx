@@ -41,23 +41,30 @@ const TaskList = ({ story, onEditTask, onDeleteTask, onBackBtnClickHnd, onAddTas
                 </div>
             </div>
             <table className="styled-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredTasks.map(task => (
-                        <tr key={task.id}>
-                            <td>{task.name}</td>
-                            <td>
-                                <button onClick={() => onEditTask(task)}>Edit</button>
-                                <button onClick={() => onDeleteTask(task)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Priority</th>
+      <th>Status</th>
+      <th>Assigned User</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredTasks.map(task => (
+      <tr key={task.id}>
+        <td>{task.name}</td>
+        <td>{task.priority}</td>
+        <td>{task.status}</td>
+        <td>{task.assignedUserId || "Unassigned"}</td>
+        <td>
+          <button onClick={() => onEditTask(task)}>Edit</button>
+          <button onClick={() => onDeleteTask(task)}>Delete</button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
             {filteredTasks.length === 0 && <p>No tasks available.</p>}
             {showModal && selectedTask && (
                 <TaskModal task={selectedTask} onClose={handleCloseModal} />

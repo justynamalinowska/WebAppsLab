@@ -13,19 +13,25 @@ const AddTask = ({ storyId, onAdd, onBackBtnClickHnd }: Props) => {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("low");
   const [estimatedTime, setEstimatedTime] = useState(1);
+  const [status, setStatus] = useState<"todo" | "doing" | "done">("todo");
+  const [assignedUserId, setAssignedUserId] = useState<string | undefined>(undefined);
+  const [assignedUserRole, setAssignedUserRole] = useState<"devops" | "developer" | undefined>(undefined);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({
+    const newTask: ITask = {
       id: 0,
       name,
       description,
       priority,
       storyId,
       estimatedTime,
-      status: "todo",
+      status,
       createdAt: new Date(),
-    });
+      ...(status === "doing" && { startedAt: new Date(), assignedUserId, assignedUserRole }),
+      ...(status === "done" && { completedAt: new Date(), assignedUserId, assignedUserRole }),
+    };
+    onAdd(newTask);
   };
 
   return (
@@ -69,6 +75,40 @@ const AddTask = ({ storyId, onAdd, onBackBtnClickHnd }: Props) => {
           placeholder="Enter estimated time"
           required
         />
+        <label htmlFor="status">Status</label>
+        <select
+          id="status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as "todo" | "doing" | "done")}
+        >
+          <option value="todo">To Do</option>
+          <option value="doing">Doing</option>
+          <option value="done">Done</option>
+        </select>
+        {(status === "doing" || status === "done") && (
+          <>
+            <label htmlFor="assignedUserId">Assigned User ID</label>
+            <input
+              id="assignedUserId"
+              type="text"
+              value={assignedUserId || ""}
+              onChange={(e) => setAssignedUserId(e.target.value)}
+              placeholder="Enter user ID"
+              required
+            />
+            <label htmlFor="assignedUserRole">Assigned User Role</label>
+            <select
+              id="assignedUserRole"
+              value={assignedUserRole || ""}
+              onChange={(e) => setAssignedUserRole(e.target.value as "devops" | "developer")}
+              required
+            >
+              <option value="">Select Role</option>
+              <option value="devops">DevOps</option>
+              <option value="developer">Developer</option>
+            </select>
+          </>
+        )}
         <div className="add-project-buttons">
           <button type="button" onClick={onBackBtnClickHnd}>
             Back
