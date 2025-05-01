@@ -1,31 +1,32 @@
 // src/components/KanbanBoard.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./KanbanBoard.style.css";
 import { ITask } from "./Task.type";
 import Api from "./Api";
 import TaskModal from "./TaskModal";
 import AddTask from "./AddTask";
+import { IStory } from "./Story.type";
 
 type Props = {
-  storyId: number;        // ID bieżącej story
+  story: IStory;        // ID bieżącej story
   onBack: () => void;     // powrót do listy stories
-  onEdit: (task: ITask) => void; // opcjonalnie do EditTask
   onAdd: () => void;
+
 };
 
-const KanbanBoard = ({ storyId, onBack, onEdit }: Props) => {
+const KanbanBoard = ({ story, onBack}: Props) => {
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
 
   const load = async () => {
-    setTasks(await Api.getTasksByStory(storyId));
+    setTasks(await Api.getTasksByStory(story.id));
   };
 
   useEffect(() => {
     load();
-  }, [storyId]);
+  }, [story.id]);
 
   const openAdd = () => setShowAdd(true);
   const closeAdd = () => { setShowAdd(false); load(); };
@@ -43,14 +44,14 @@ const KanbanBoard = ({ storyId, onBack, onEdit }: Props) => {
   return (
     <div className="kanban-container">
       <div className="kanban-header">
-        <h2>Kanban Board</h2>
+        <h2>Kanban Board for {story.title}</h2>
         <button onClick={onBack}>Back</button>
         <button onClick={openAdd}>Add Task</button>
       </div>
 
       {showAdd && (
         <AddTask
-          storyId={storyId}
+          storyId={story.id}
           onBackBtnClickHnd={closeAdd}
           onSubmitClickHnd={async t => {
             await Api.addTask(t);

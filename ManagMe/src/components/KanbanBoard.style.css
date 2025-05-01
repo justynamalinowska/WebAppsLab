@@ -6,24 +6,29 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
+    align-items: center;
+    justify-content: center;
+    color: white;
   }
   
   .kanban-board {
     display: flex;
     gap: 1rem;
+    color: black;
   }
   
   .kanban-column {
     flex: 1;
-    background: #989898;
+    background: #fcfcfc;
     padding: 0.5rem;
     border-radius: 4px;
+    min-width: 30%;
   }
   
   .task-card {
-    background: #ffffff;
+    background: #999999;
     margin: 0.5rem 0;
-    padding: 0.5rem;
+    padding: 0.9rem;
     border-radius: 4px;
     cursor: pointer;
     color: black;
@@ -36,3 +41,8 @@
     cursor: pointer;
     padding: 5px;
   }
+
+  .kanban-container {
+    min-width: 50%;
+  }
+

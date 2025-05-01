@@ -10,7 +10,7 @@ import AddStory from "./AddStory";
 import EditStory from "./EditStory";
 import KanbanBoard from "./KanbanBoard";
 import AddTask from "./AddTask";
-import EditTask from "./EditTask";
+// import EditTask from "./EditTask";
 import Api from "./Api";
 import { IStory } from "./Story.type";
 import { ITask } from "./Task.type";
@@ -29,7 +29,7 @@ const Home = () => {
   const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
   // Task CRUD
-  const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
+//   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
   // Przykładowy użytkownik
   const [user] = useState<IUser>({
@@ -126,14 +126,14 @@ const Home = () => {
     await Api.addTask(t);
     setShownPage(PageEnum.kanban);
   };
-  const openEditTask = (t: ITask) => {
-    setTaskToEdit(t);
-    setShownPage(PageEnum.editTask);
-  };
-  const updateTask = async (t: ITask) => {
-    await Api.updateTask(t);
-    setShownPage(PageEnum.kanban);
-  };
+//   const openEditTask = (t: ITask) => {
+//     setTaskToEdit(t);
+//     setShownPage(PageEnum.editTask);
+//   };
+//   const updateTask = async (t: ITask) => {
+//     await Api.updateTask(t);
+//     setShownPage(PageEnum.kanban);
+//   };
 
   // Wracanie
   const backToList = () => setShownPage(PageEnum.list);
@@ -203,10 +203,9 @@ const Home = () => {
 
         {shownPage === PageEnum.kanban && selectedStory && (
           <KanbanBoard
-            storyId={selectedStory.id}
+            story={selectedStory}
             onBack={backToStories}
             onAdd={openAddTask}
-            onEdit={openEditTask}
           />
         )}
 
@@ -218,13 +217,13 @@ const Home = () => {
           />
         )}
 
-        {shownPage === PageEnum.editTask && taskToEdit && (
+        {/* {shownPage === PageEnum.editTask && taskToEdit && (
           <EditTask
             data={taskToEdit}
             onBackBtnClickHnd={backToKanban}
             onUpdateClickHnd={updateTask}
           />
-        )}
+        )} */}
       </section>
     </>
   );
