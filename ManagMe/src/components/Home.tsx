@@ -17,21 +17,21 @@ import { ITask } from "./Task.type";
 import IUser from "./User.type";
 
 const Home = () => {
-  // -------- projekty --------
+  // Projekty
   const [projectList, setProjectsList] = useState<IProject[]>([]);
   const [currentProject, setCurrentProject] = useState<IProject | null>(null);
 
-  // -------- logika nawigacji --------
+  // Nawigacja
   const [shownPage, setShownPage] = useState<PageEnum>(PageEnum.list);
   const [dataToEditProject, setDataToEditProject] = useState<IProject>({} as IProject);
 
-  // -------- story --------
+  // Story
   const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
-  // -------- task CRUD --------
+  // Task CRUD
   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
-  // -------- przyklad usera --------
+  // Przykładowy użytkownik
   const [user] = useState<IUser>({
     id: "1",
     firstName: "Justyna",
@@ -39,12 +39,12 @@ const Home = () => {
     Role: "Admin",
   });
 
-  // ——— wczytaj projekty ———
+  // Wczytaj projekty
   useEffect(() => {
     Api.getProjects().then(setProjectsList);
   }, []);
 
-  // helpers do aktualizacji localStorage
+  // Helpers do localStorage
   const saveProjects = (list: IProject[]) => {
     setProjectsList(list);
     window.localStorage.setItem("projects", JSON.stringify(list));
@@ -52,20 +52,26 @@ const Home = () => {
   const saveStories = (stories: IStory[]) => {
     if (!currentProject) return;
     const updated = { ...currentProject, stories };
-    const updatedList = projectList.map(p => p.id === updated.id ? updated : p);
+    const updatedList = projectList.map(p =>
+      p.id === updated.id ? updated : p
+    );
     saveProjects(updatedList);
     setCurrentProject(updated);
   };
 
-  // generatory ID
+  // Generatory ID
   const nextProjId = () =>
     projectList.length ? Math.max(...projectList.map(p => p.id)) + 1 : 1;
-  const nextStoryId = () =>
-    currentProject && currentProject.stories
-      ? Math.max(...currentProject.stories.map(s => s.id)) + 1
-      : 1;
 
-  // ——— PROJECT HANDLERS ———
+  // **GLOBALNY** generator dla story — unikalne w całej aplikacji
+  const nextStoryId = () => {
+    const allStories = projectList.flatMap(p => p.stories || []);
+    return allStories.length
+      ? Math.max(...allStories.map(s => s.id)) + 1
+      : 1;
+  };
+
+  // PROJECT HANDLERS
   const addProject = (p: IProject) => {
     saveProjects([...projectList, { ...p, id: nextProjId(), stories: [] }]);
     setShownPage(PageEnum.list);
@@ -87,19 +93,26 @@ const Home = () => {
     setShownPage(PageEnum.stories);
   };
 
-  // ——— STORY HANDLERS ———
+  // STORY HANDLERS
   const addStory = (s: IStory) => {
     if (!currentProject) return;
-    saveStories([...currentProject.stories!, { ...s, id: nextStoryId(), projectId: currentProject.id }]);
+    saveStories([
+      ...(currentProject.stories || []),
+      { ...s, id: nextStoryId(), projectId: currentProject.id },
+    ]);
     setShownPage(PageEnum.stories);
   };
   const startEditStory = (s: IStory) => {
-    saveStories(currentProject!.stories!.map(x => x.id === s.id ? s : x));
+    saveStories(
+      currentProject!.stories!.map(x => x.id === s.id ? s : x)
+    );
     setSelectedStory(s);
     setShownPage(PageEnum.editStory);
   };
   const deleteStory = (s: IStory) => {
-    saveStories(currentProject!.stories!.filter(x => x.id !== s.id));
+    saveStories(
+      currentProject!.stories!.filter(x => x.id !== s.id)
+    );
     setShownPage(PageEnum.stories);
   };
   const openKanban = (s: IStory) => {
@@ -107,7 +120,7 @@ const Home = () => {
     setShownPage(PageEnum.kanban);
   };
 
-  // ——— TASK HANDLERS ———
+  // TASK HANDLERS
   const openAddTask = () => setShownPage(PageEnum.addTask);
   const addTask = async (t: ITask) => {
     await Api.addTask(t);
@@ -122,7 +135,7 @@ const Home = () => {
     setShownPage(PageEnum.kanban);
   };
 
-  // ——— wspólne ———
+  // Wracanie
   const backToList = () => setShownPage(PageEnum.list);
   const backToStories = () => setShownPage(PageEnum.stories);
   const backToKanban = () => setShownPage(PageEnum.kanban);
@@ -143,9 +156,14 @@ const Home = () => {
             setShownPage={setShownPage}
           />
         )}
+
         {shownPage === PageEnum.add && (
-          <AddProject onBackBtnClickHnd={backToList} onSubmitClickHnd={addProject} />
+          <AddProject
+            onBackBtnClickHnd={backToList}
+            onSubmitClickHnd={addProject}
+          />
         )}
+
         {shownPage === PageEnum.edit && (
           <EditProject
             data={dataToEditProject}
@@ -153,6 +171,7 @@ const Home = () => {
             onUpdateClickHnd={updateProject}
           />
         )}
+
         {shownPage === PageEnum.stories && currentProject && (
           <StoryList
             project={currentProject}
@@ -164,6 +183,7 @@ const Home = () => {
             onPageChange={setShownPage}
           />
         )}
+
         {shownPage === PageEnum.addStory && currentProject && (
           <AddStory
             project={currentProject}
@@ -172,6 +192,7 @@ const Home = () => {
             onSubmitClickHnd={addStory}
           />
         )}
+
         {shownPage === PageEnum.editStory && selectedStory && (
           <EditStory
             data={selectedStory}
@@ -179,6 +200,7 @@ const Home = () => {
             onUpdateClickHnd={startEditStory}
           />
         )}
+
         {shownPage === PageEnum.kanban && selectedStory && (
           <KanbanBoard
             storyId={selectedStory.id}
@@ -187,6 +209,7 @@ const Home = () => {
             onEdit={openEditTask}
           />
         )}
+
         {shownPage === PageEnum.addTask && selectedStory && (
           <AddTask
             storyId={selectedStory.id}
@@ -194,6 +217,7 @@ const Home = () => {
             onSubmitClickHnd={addTask}
           />
         )}
+
         {shownPage === PageEnum.editTask && taskToEdit && (
           <EditTask
             data={taskToEdit}
