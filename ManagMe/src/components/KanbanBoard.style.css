@@ -15,16 +15,24 @@
   
   .kanban-column {
     flex: 1;
-    background: #cecccc;
+    background: #989898;
     padding: 0.5rem;
     border-radius: 4px;
   }
   
   .task-card {
-    background: #cecccc;
+    background: #ffffff;
     margin: 0.5rem 0;
     padding: 0.5rem;
     border-radius: 4px;
     cursor: pointer;
+    color: black;
   }
   
+  button {
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 2px;
+  }

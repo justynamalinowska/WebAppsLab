@@ -52,6 +52,7 @@ const KanbanBoard = ({ onBack, onAdd }: Props) => {
   return (
     <div className="kanban-container">
       <div className="kanban-header">
+        <h2>Kanban board for ...</h2>
         <button onClick={onBack}>Back</button>
         <button onClick={onAdd}>Add Task</button>
       </div>
