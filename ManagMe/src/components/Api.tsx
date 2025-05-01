@@ -32,6 +32,10 @@ class Api {
     }));
   }
 
+  static async getTasksByStory(storyId: number): Promise<ITask[]> {
+    return (await this.getTasks()).filter(t => t.storyId === storyId);
+  }
+
   static async addTask(task: ITask): Promise<void> {
     const tasks = await this.getTasks();
     tasks.push(task);
