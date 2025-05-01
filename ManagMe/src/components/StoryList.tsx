@@ -6,14 +6,16 @@ import StoryModal from "./StoryModal";
 
 type Props = {
     project: IProject;
-    onDeleteClickHnd: (data: IStory) => void;
+    stories: IStory[];
+    onDelete: (data: IStory) => void;
     onEdit: (data: IStory) => void;
     onPageChange: (page: PageEnum) => void;
-    onBackBtnClickHnd: () => void;
+    onBack: () => void;
+    onSelect(story: IStory) : void;
 };
 
 const StoryList = (props: Props) => {
-    const { project, onDeleteClickHnd, onEdit, onPageChange, onBackBtnClickHnd } = props;
+    const { project, onDelete, onEdit, onPageChange, onBack, onSelect } = props;
     const [showModal, setShowModal] = useState(false);
     const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
     const [filterStatus, setFilterStatus] = useState<"all" | "todo" | "doing" | "done">("all");
@@ -46,7 +48,7 @@ const StoryList = (props: Props) => {
                     <option value="doing">Doing</option>
                     <option value="done">Done</option>
                 </select>
-                <input type="button" value="Back" onClick={onBackBtnClickHnd} />
+                <input type="button" value="Back" onClick={onBack} />
                 <input type="button" value="Add Story" onClick={() => onPageChange(PageEnum.addStory)} />
             </div>
             <table className="styled-table">
@@ -71,9 +73,10 @@ const StoryList = (props: Props) => {
                                 <td>{story.status}</td>
                                 <td>
                                     <div className="action-buttons">
-                                        <input type="button" value="View" onClick={() => viewStory(story)} />
+                                        <input type="button" value="Details" onClick={() => viewStory(story)} />
                                         <input type="button" value="Edit" onClick={() => { onEdit(story); onPageChange(PageEnum.editStory); }} />
-                                        <input type="button" value="Delete" onClick={() => onDeleteClickHnd(story)} />
+                                        <input type="button" value="Delete" onClick={() => onDelete(story)} />
+                                        <input type="button" value="Kanban" onClick={() => onSelect(story)} />
                                     </div>
                                 </td>
                             </tr>

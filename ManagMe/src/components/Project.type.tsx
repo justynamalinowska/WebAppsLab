@@ -10,10 +10,13 @@ export interface IProject {
 
 export enum PageEnum {
   list,
-  add, 
+  add,
   edit,
   stories,
-  addStory,    
-  editStory,   
+  addStory,
+  editStory,
   deleteStory,
+  addTask,
+  editTask,
+  kanban,
 }
