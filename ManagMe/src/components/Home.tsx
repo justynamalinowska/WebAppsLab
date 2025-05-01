@@ -1,166 +1,209 @@
+// src/components/Home.tsx
 import "./Home.style.css";
 import { useEffect, useState } from "react";
 import { IProject, PageEnum } from "./Project.type";
 import ProjectList from "./ProjectList";
 import AddProject from "./AddProject";
 import EditProject from "./EditProject";
-import IUser from "./User.type";
-import Api from "./Api";
-import { IStory } from "./Story.type";
 import StoryList from "./StoryList";
 import AddStory from "./AddStory";
 import EditStory from "./EditStory";
+import KanbanBoard from "./KanbanBoard";
+import AddTask from "./AddTask";
+import EditTask from "./EditTask";
+import Api from "./Api";
+import { IStory } from "./Story.type";
+import { ITask } from "./Task.type";
+import IUser from "./User.type";
 
 const Home = () => {
-    const [projectList, setProjectsList] = useState([] as IProject[]);
-    const [shownPage, setShownPage] = useState(PageEnum.list);
-    const [dataToEdit, setDataToEdit] = useState({} as IProject);
-    const [user, setUser] = useState<IUser>({ id: "1", firstName: "Justyna", lastName: "Malinowska", Role: "Admin" });
-    const [currentProject, setCurrentProject] = useState<IProject | null>(null);
-    const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
+  // -------- projekty --------
+  const [projectList, setProjectsList] = useState<IProject[]>([]);
+  const [currentProject, setCurrentProject] = useState<IProject | null>(null);
 
-    const showListPage = () => setShownPage(PageEnum.list);
+  // -------- logika nawigacji --------
+  const [shownPage, setShownPage] = useState<PageEnum>(PageEnum.list);
+  const [dataToEditProject, setDataToEditProject] = useState<IProject>({} as IProject);
 
-    useEffect(() => {
-        Api.getProjects().then(setProjectsList);
-    }, []);
+  // -------- story --------
+  const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
 
-    useEffect(() => {
-        Api.getCurrentProject().then(project => {
-            if (project && project.id !== undefined) {
-                setCurrentProject({ ...project, stories: project.stories || [] });
-            }
-        });
-    }, []);
+  // -------- task CRUD --------
+  const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
-    useEffect(() => {
-        if (currentProject) {
-            const projects = JSON.parse(window.localStorage.getItem("projects") || "[]") as IProject[];
-            const updatedProject = projects.find(p => p.id === currentProject.id);
-            if (updatedProject) {
-                setCurrentProject(updatedProject);
-            }
-        }
-    }, [currentProject?.id]);
+  // -------- przyklad usera --------
+  const [user] = useState<IUser>({
+    id: "1",
+    firstName: "Justyna",
+    lastName: "Malinowska",
+    Role: "Admin",
+  });
 
-    const _setProjectsList = (data: IProject[]) => {
-        setProjectsList(data);
-        window.localStorage.setItem("projects", JSON.stringify(data));
-    };
+  // ——— wczytaj projekty ———
+  useEffect(() => {
+    Api.getProjects().then(setProjectsList);
+  }, []);
 
-    const _setStoriesList = (data: IStory[]) => {
-        if (currentProject) {
-            const updatedProject = { ...currentProject, stories: data };
-            const updatedProjects = projectList.map(p => p.id === currentProject.id ? updatedProject : p);
-            setProjectsList(updatedProjects);
-            setCurrentProject(updatedProject);
-            window.localStorage.setItem("projects", JSON.stringify(updatedProjects));
-        }
-    };
+  // helpers do aktualizacji localStorage
+  const saveProjects = (list: IProject[]) => {
+    setProjectsList(list);
+    window.localStorage.setItem("projects", JSON.stringify(list));
+  };
+  const saveStories = (stories: IStory[]) => {
+    if (!currentProject) return;
+    const updated = { ...currentProject, stories };
+    const updatedList = projectList.map(p => p.id === updated.id ? updated : p);
+    saveProjects(updatedList);
+    setCurrentProject(updated);
+  };
 
-    const generateUniqueProjectId = (): number => {
-        const ids = projectList.map(project => project.id);
-        return ids.length > 0 ? Math.max(...ids) + 1 : 1;
-    };
+  // generatory ID
+  const nextProjId = () =>
+    projectList.length ? Math.max(...projectList.map(p => p.id)) + 1 : 1;
+  const nextStoryId = () =>
+    currentProject && currentProject.stories
+      ? Math.max(...currentProject.stories.map(s => s.id)) + 1
+      : 1;
 
-    const generateUniqueStoryId = (): number => {
-        if (currentProject) {
-            const ids = (currentProject.stories || []).map(story => story.id);
-            return ids.length > 0 ? Math.max(...ids) + 1 : 1;
-        }
-        return 1;
-    };
+  // ——— PROJECT HANDLERS ———
+  const addProject = (p: IProject) => {
+    saveProjects([...projectList, { ...p, id: nextProjId(), stories: [] }]);
+    setShownPage(PageEnum.list);
+  };
+  const startEditProject = (p: IProject) => {
+    setDataToEditProject(p);
+    setShownPage(PageEnum.edit);
+  };
+  const updateProject = (p: IProject) => {
+    saveProjects(projectList.map(x => x.id === p.id ? p : x));
+    setShownPage(PageEnum.list);
+  };
+  const deleteProject = (p: IProject) => {
+    saveProjects(projectList.filter(x => x.id !== p.id));
+  };
+  const selectProject = (p: IProject) => {
+    setCurrentProject({ ...p, stories: p.stories || [] });
+    Api.setCurrentProject(p);
+    setShownPage(PageEnum.stories);
+  };
 
-    useEffect(() => {
-        const projectsListInString = window.localStorage.getItem("projects");
-        if (projectsListInString) {
-            setProjectsList(JSON.parse(projectsListInString));
-        }
-    }, []);
+  // ——— STORY HANDLERS ———
+  const addStory = (s: IStory) => {
+    if (!currentProject) return;
+    saveStories([...currentProject.stories!, { ...s, id: nextStoryId(), projectId: currentProject.id }]);
+    setShownPage(PageEnum.stories);
+  };
+  const startEditStory = (s: IStory) => {
+    saveStories(currentProject!.stories!.map(x => x.id === s.id ? s : x));
+    setSelectedStory(s);
+    setShownPage(PageEnum.editStory);
+  };
+  const deleteStory = (s: IStory) => {
+    saveStories(currentProject!.stories!.filter(x => x.id !== s.id));
+    setShownPage(PageEnum.stories);
+  };
+  const openKanban = (s: IStory) => {
+    setSelectedStory(s);
+    setShownPage(PageEnum.kanban);
+  };
 
-    const addProjectHnd = (data: IProject) => {
-        const newProject = { ...data, id: generateUniqueProjectId(), stories: [] };
-        _setProjectsList([...projectList, newProject]);
-        showListPage();
-    }
+  // ——— TASK HANDLERS ———
+  const openAddTask = () => setShownPage(PageEnum.addTask);
+  const addTask = async (t: ITask) => {
+    await Api.addTask(t);
+    setShownPage(PageEnum.kanban);
+  };
+  const openEditTask = (t: ITask) => {
+    setTaskToEdit(t);
+    setShownPage(PageEnum.editTask);
+  };
+  const updateTask = async (t: ITask) => {
+    await Api.updateTask(t);
+    setShownPage(PageEnum.kanban);
+  };
 
-    const deleteProject = (data: IProject) => {
-        const indexToDelete = projectList.indexOf(data);
-        const tempList = [...projectList];
+  // ——— wspólne ———
+  const backToList = () => setShownPage(PageEnum.list);
+  const backToStories = () => setShownPage(PageEnum.stories);
+  const backToKanban = () => setShownPage(PageEnum.kanban);
 
-        tempList.splice(indexToDelete, 1);
-        _setProjectsList(tempList);
-    };
-
-    const editProject = (data: IProject) => {
-        setShownPage(PageEnum.edit);
-        setDataToEdit(data);
-    };
-
-    const updateData = (data: IProject) => {
-        const filterData = projectList.filter((project) => project.id === data.id)[0];
-        const indexOfRecord = projectList.indexOf(filterData);
-        const tempList = [...projectList];
-        tempList[indexOfRecord] = data;
-        _setProjectsList(tempList);
-        showListPage();
-    };
-
-    const selectProject = (project: IProject) => {
-        setCurrentProject({ ...project, stories: project.stories || [] });
-        Api.setCurrentProject(project);
-        setShownPage(PageEnum.stories);
-    };
-
-    const editStory = (story: IStory) => {
-        if (currentProject) {
-            const updatedStories = (currentProject.stories || []).map(s => s.id === story.id ? story : s);
-            _setStoriesList(updatedStories);
-            setSelectedStory(story);
-            setShownPage(PageEnum.editStory);
-        }
-    };
-
-    const deleteStory = (story: IStory) => {
-        if (currentProject) {
-            const updatedStories = (currentProject.stories || []).filter(s => s.id !== story.id);
-            _setStoriesList(updatedStories);
-            setShownPage(PageEnum.stories);
-        }
-    };
-
-    const addStory = (story: IStory) => {
-        if (currentProject) {
-            const newStory = { ...story, id: generateUniqueStoryId(), projectId: currentProject.id };
-            const updatedStories = [...(currentProject.stories || []), newStory];
-            _setStoriesList(updatedStories);
-            setShownPage(PageEnum.stories);
-        }
-    };
-
-    const backToProjectList = () => {
-        Api.setCurrentProject({} as IProject);
-        setShownPage(PageEnum.list);
-    };
-
-    return (
-    <> 
-        <article className="article-header">
-            <header>
-                <h1>ManageMe</h1>
-                <p>Welcome, {user.firstName} {user.lastName}</p>
-            </header>
-        </article>
-
-        <section className="section-content-projects">
-            {shownPage === PageEnum.list && <ProjectList list={projectList} setShownPage={setShownPage} onDeleteClickHnd={deleteProject} onEdit={editProject} onSelect={selectProject}/>}
-            {shownPage === PageEnum.add && <AddProject onBackBtnClickHnd={showListPage} onSubmitClickHnd={addProjectHnd}/>}
-            {shownPage == PageEnum.edit && <EditProject data={dataToEdit} onBackBtnClickHnd={showListPage} onUpdateClickHnd={updateData}/>}
-            {shownPage === PageEnum.stories && currentProject && (<StoryList project={currentProject} onEdit={editStory} onDeleteClickHnd={deleteStory} onPageChange={setShownPage} onBackBtnClickHnd={backToProjectList}/>)}
-            {shownPage === PageEnum.addStory && <AddStory project={currentProject} userId={user.id} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onSubmitClickHnd={addStory} />} 
-            {shownPage === PageEnum.editStory && <EditStory data={selectedStory!} onBackBtnClickHnd={() => setShownPage(PageEnum.stories)} onUpdateClickHnd={editStory} />} 
-        </section>
-    </>);
+  return (
+    <>
+      <article className="article-header">
+        <h1>ManageMe</h1>
+        <p>Welcome, {user.firstName} {user.lastName}</p>
+      </article>
+      <section className="section-content-projects">
+        {shownPage === PageEnum.list && (
+          <ProjectList
+            list={projectList}
+            onSelect={selectProject}
+            onDeleteClickHnd={deleteProject}
+            onEdit={startEditProject}
+            setShownPage={setShownPage}
+          />
+        )}
+        {shownPage === PageEnum.add && (
+          <AddProject onBackBtnClickHnd={backToList} onSubmitClickHnd={addProject} />
+        )}
+        {shownPage === PageEnum.edit && (
+          <EditProject
+            data={dataToEditProject}
+            onBackBtnClickHnd={backToList}
+            onUpdateClickHnd={updateProject}
+          />
+        )}
+        {shownPage === PageEnum.stories && currentProject && (
+          <StoryList
+            project={currentProject}
+            stories={currentProject.stories!}
+            onSelect={openKanban}
+            onEdit={startEditStory}
+            onDelete={deleteStory}
+            onBack={backToList}
+            onPageChange={setShownPage}
+          />
+        )}
+        {shownPage === PageEnum.addStory && currentProject && (
+          <AddStory
+            project={currentProject}
+            userId={user.id}
+            onBackBtnClickHnd={backToStories}
+            onSubmitClickHnd={addStory}
+          />
+        )}
+        {shownPage === PageEnum.editStory && selectedStory && (
+          <EditStory
+            data={selectedStory}
+            onBackBtnClickHnd={backToStories}
+            onUpdateClickHnd={startEditStory}
+          />
+        )}
+        {shownPage === PageEnum.kanban && selectedStory && (
+          <KanbanBoard
+            storyId={selectedStory.id}
+            onBack={backToStories}
+            onAdd={openAddTask}
+            onEdit={openEditTask}
+          />
+        )}
+        {shownPage === PageEnum.addTask && selectedStory && (
+          <AddTask
+            storyId={selectedStory.id}
+            onBackBtnClickHnd={backToKanban}
+            onSubmitClickHnd={addTask}
+          />
+        )}
+        {shownPage === PageEnum.editTask && taskToEdit && (
+          <EditTask
+            data={taskToEdit}
+            onBackBtnClickHnd={backToKanban}
+            onUpdateClickHnd={updateTask}
+          />
+        )}
+      </section>
+    </>
+  );
 };
 
 export default Home;
