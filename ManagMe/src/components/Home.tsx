@@ -15,6 +15,8 @@ import Api from "./Api";
 import { IStory } from "./Story.type";
 import { ITask } from "./Task.type";
 import IUser from "./User.type";
+import { useNavigate } from "react-router-dom";
+import {fetchWithAuth} from "./BackendApi";
 
 const Home = () => {
   // Projekty
@@ -30,6 +32,29 @@ const Home = () => {
 
   // Task CRUD
 //   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
+
+const navigate = useNavigate();
+
+const handleLogout = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  try {
+    if (refreshToken) {
+      // jeśli dodałeś endpoint POST /auth/logout, wyślij tam request z auth
+      await fetchWithAuth("/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken })
+      });
+    }
+  } catch (err) {
+    console.error("Błąd przy wylogowaniu:", err);
+  } finally {
+    // niezależnie od wyniku żądania, czyścimy dane i przekierowujemy
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    navigate("/login", { replace: true });
+  }
+};
 
   // Przykładowy użytkownik
   const [user] = useState<IUser>({
@@ -144,7 +169,7 @@ const Home = () => {
     <>
       <article className="article-header">
         <h1>ManageMe</h1>
-        <p>Welcome, {user.firstName} {user.lastName}</p>
+        <p>Welcome, {user.firstName} {user.lastName} <button className="logout-button" onClick={handleLogout}>Wyloguj</button></p> 
       </article>
       <section className="section-content-projects">
         {shownPage === PageEnum.list && (
