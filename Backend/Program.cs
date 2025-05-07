@@ -6,6 +6,8 @@ using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://localhost:5000");
+
 // 1) CORS: pozwalamy na requests z Twojego Vite (domyślnie http://localhost:5173)
 builder.Services.AddCors(o => o.AddPolicy("AllowFrontend", p =>
 {
