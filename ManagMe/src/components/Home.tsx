@@ -55,19 +55,32 @@ const handleLogout = async () => {
     navigate("/login", { replace: true });
   }
 };
-
-  // Przykładowy użytkownik
-  const [user] = useState<IUser>({
-    id: "1",
-    firstName: "Justyna",
-    lastName: "Malinowska",
-    Role: "Admin",
-  });
+  const [user, setUser] = useState<IUser | null>(null);
+  // // Przykładowy użytkownik
+  // const [user] = useState<IUser>({
+  //   id: "1",
+  //   firstName: "Justyna",
+  //   lastName: "Malinowska",
+  //   Role: "Admin",
+  // });
 
   // Wczytaj projekty
   useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetchWithAuth("/auth/me");
+        if (!res.ok) throw new Error();
+        const me: IUser = await res.json();
+        setUser(me);
+      } catch {
+        navigate("/login", { replace: true });
+      }
+    })();
+
+    // zamiast Api.getProjects → BackendApi.getProjects()
     Api.getProjects().then(setProjectsList);
   }, []);
+
 
   // Helpers do localStorage
   const saveProjects = (list: IProject[]) => {
@@ -169,7 +182,7 @@ const handleLogout = async () => {
     <>
       <article className="article-header">
         <h1>ManageMe</h1>
-        <p>Welcome, {user.firstName} {user.lastName} <button className="logout-button" onClick={handleLogout}>Wyloguj</button></p> 
+        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Wyloguj</button></p> 
       </article>
       <section className="section-content-projects">
         {shownPage === PageEnum.list && (
@@ -212,7 +225,7 @@ const handleLogout = async () => {
         {shownPage === PageEnum.addStory && currentProject && (
           <AddStory
             project={currentProject}
-            userId={user.id}
+            userId={user!.id}
             onBackBtnClickHnd={backToStories}
             onSubmitClickHnd={addStory}
           />

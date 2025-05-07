@@ -117,7 +117,7 @@
     margin-left: 0.5em;
     background-color: #F8C8DC;
     color: #ffffff;
-    border: none;
+    border: 1px solid whitesmoke;
     border-radius: 8px;
     padding: 0.3em 0.8em;
     font-size: 1em;
@@ -129,6 +129,7 @@
   
   .logout-button:hover {
     background-color: #f5aac9;
+    border: 1px solid whitesmoke;
   }
   
   .article-header p {

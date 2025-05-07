@@ -62,7 +62,7 @@ public class AuthController : ControllerBase
     {
         var id = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var u = _userService.GetById(id)!;
-        return Ok(new UserDto { Id = u.Id, Username = u.Username, Email = u.Email });
+        return Ok(new UserDto { Id = u.Id, Username = u.Username, Email = u.Email, Role = u.Role });
     }
 
     private string GenerateJwt(User user)
