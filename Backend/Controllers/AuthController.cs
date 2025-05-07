@@ -62,7 +62,7 @@ public class AuthController : ControllerBase
     {
         var id = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var u = _userService.GetById(id)!;
-        return Ok(new UserDto { Id = u.Id, Username = u.Username, Email = u.Email });
+        return Ok(new UserDto { Id = u.Id, Username = u.Username, Email = u.Email, Role = u.Role });
     }
 
     private string GenerateJwt(User user)
@@ -83,5 +83,13 @@ public class AuthController : ControllerBase
                                                         SecurityAlgorithms.HmacSha256Signature)
         };
         return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+    }
+
+  [HttpPost("logout")]
+    public IActionResult Logout([FromBody] LogoutRequest req)
+    {
+    if (_refreshTokens.ContainsKey(req.RefreshToken))
+        _refreshTokens.Remove(req.RefreshToken);
+    return NoContent();  
     }
 }

@@ -5,7 +5,7 @@ import { IProject } from "./Project.type";
 
 type Props = {
     project: IProject | null;
-    userId: string;
+    userId: number;
     onBackBtnClickHnd: () => void;
     onSubmitClickHnd: (data: IStory) => void;
 }
@@ -44,7 +44,7 @@ const AddStory = (props: Props) => {
                 priority,
                 status,
                 projectId: project.id,
-                ownerId: userId,
+                ownerId: userId.toString(),
                 createdAt: new Date()
             };
             onSubmitClickHnd(newStory);

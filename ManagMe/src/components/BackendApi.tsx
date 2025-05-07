@@ -1,5 +1,5 @@
 // src/Api.ts
-const API_ROOT = 'http://localhost:5000/api';
+export const API_ROOT = 'http://localhost:5000/api';
 
 export async function fetchWithAuth(
   path: string,
@@ -8,34 +8,42 @@ export async function fetchWithAuth(
   const token = localStorage.getItem('token');
   const refreshToken = localStorage.getItem('refreshToken');
 
+  // Dodaj header Authorization, jeśli mamy token
   options.headers = {
     ...(options.headers as object),
     Authorization: token ? `Bearer ${token}` : '',
     'Content-Type': 'application/json',
   };
 
+  // Pierwszy request
   let res = await fetch(`${API_ROOT}${path}`, options);
 
+  // Jeśli dostałeś 401 i masz refreshToken — spróbuj odświeżyć
   if (res.status === 401 && refreshToken) {
-    // spróbuj odświeżyć
     const r = await fetch(`${API_ROOT}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
     });
+
     if (!r.ok) {
-      // np. przekieruj na login
+      // Nie udało się odświeżyć → wyloguj
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       window.location.href = '/login';
       return res;
     }
+
+    // Mamy nowy tokeny
     const data = await r.json();
     localStorage.setItem('token', data.token);
     localStorage.setItem('refreshToken', data.refreshToken);
 
-    // powtórz oryginalne
+    // Powtórz oryginalne zapytanie z nowym tokenem
     options.headers = {
       ...(options.headers as object),
       Authorization: `Bearer ${data.token}`,
+      'Content-Type': 'application/json',
     };
     res = await fetch(`${API_ROOT}${path}`, options);
   }
@@ -43,6 +51,7 @@ export async function fetchWithAuth(
   return res;
 }
 
+// Przykładowa ekspozycja metod API:
 export default {
   getProjects: () => fetchWithAuth('/projects').then(r => r.json()),
   addTask: (t: any) =>
@@ -50,5 +59,5 @@ export default {
       method: 'POST',
       body: JSON.stringify(t),
     }).then(r => r.json()),
-  // … reszta metod
 };
+

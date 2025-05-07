@@ -15,6 +15,8 @@ import Api from "./Api";
 import { IStory } from "./Story.type";
 import { ITask } from "./Task.type";
 import IUser from "./User.type";
+import { useNavigate } from "react-router-dom";
+import {fetchWithAuth} from "./BackendApi";
 
 const Home = () => {
   // Projekty
@@ -31,18 +33,54 @@ const Home = () => {
   // Task CRUD
 //   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
-  // Przykładowy użytkownik
-  const [user] = useState<IUser>({
-    id: "1",
-    firstName: "Justyna",
-    lastName: "Malinowska",
-    Role: "Admin",
-  });
+const navigate = useNavigate();
+
+const handleLogout = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  try {
+    if (refreshToken) {
+      // jeśli dodałeś endpoint POST /auth/logout, wyślij tam request z auth
+      await fetchWithAuth("/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken })
+      });
+    }
+  } catch (err) {
+    console.error("Błąd przy wylogowaniu:", err);
+  } finally {
+    // niezależnie od wyniku żądania, czyścimy dane i przekierowujemy
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    navigate("/login", { replace: true });
+  }
+};
+  const [user, setUser] = useState<IUser | null>(null);
+  // // Przykładowy użytkownik
+  // const [user] = useState<IUser>({
+  //   id: "1",
+  //   firstName: "Justyna",
+  //   lastName: "Malinowska",
+  //   Role: "Admin",
+  // });
 
   // Wczytaj projekty
   useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetchWithAuth("/auth/me");
+        if (!res.ok) throw new Error();
+        const me: IUser = await res.json();
+        setUser(me);
+      } catch {
+        navigate("/login", { replace: true });
+      }
+    })();
+
+    // zamiast Api.getProjects → BackendApi.getProjects()
     Api.getProjects().then(setProjectsList);
   }, []);
+
 
   // Helpers do localStorage
   const saveProjects = (list: IProject[]) => {
@@ -144,7 +182,7 @@ const Home = () => {
     <>
       <article className="article-header">
         <h1>ManageMe</h1>
-        <p>Welcome, {user.firstName} {user.lastName}</p>
+        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Wyloguj</button></p> 
       </article>
       <section className="section-content-projects">
         {shownPage === PageEnum.list && (
@@ -187,7 +225,7 @@ const Home = () => {
         {shownPage === PageEnum.addStory && currentProject && (
           <AddStory
             project={currentProject}
-            userId={user.id}
+            userId={user!.id}
             onBackBtnClickHnd={backToStories}
             onSubmitClickHnd={addStory}
           />
