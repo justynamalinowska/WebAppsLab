@@ -85,11 +85,11 @@ public class AuthController : ControllerBase
         return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
     }
 
-    [Authorize]
-    [HttpPost("logout")]
+  [HttpPost("logout")]
     public IActionResult Logout([FromBody] LogoutRequest req)
     {
-    _refreshTokens.Remove(req.RefreshToken);
-    return NoContent();
+    if (_refreshTokens.ContainsKey(req.RefreshToken))
+        _refreshTokens.Remove(req.RefreshToken);
+    return NoContent();  
     }
 }
