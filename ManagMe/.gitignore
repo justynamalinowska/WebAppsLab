@@ -23,11 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-Thought for a second
-
-
-Oto lista wpisów z przykładowego pliku `.gitignore`:
-
 * `logs/`
 * `*.log`
 * `npm-debug.log*`
