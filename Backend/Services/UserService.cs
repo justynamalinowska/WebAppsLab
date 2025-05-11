@@ -25,4 +25,15 @@ public class UserService : IUserService
 
     public User? GetById(int id) =>
         _users.SingleOrDefault(u => u.Id == id);
+
+    public User? GetByEmail(string email)
+    => _users.SingleOrDefault(u => u.Email == email);
+
+    public User CreateExternalUser(User ext)
+    {
+        ext.Id = _users.Any() ? _users.Max(u => u.Id) + 1 : 1;
+        ext.Role = "guest";
+        _users.Add(ext);
+        return ext;
+    }
 }

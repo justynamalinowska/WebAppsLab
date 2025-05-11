@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace Backend.Controllers;
 
@@ -85,11 +87,55 @@ public class AuthController : ControllerBase
         return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
     }
 
-  [HttpPost("logout")]
-    public IActionResult Logout([FromBody] LogoutRequest req)
+    [AllowAnonymous]
+    [HttpGet("google-login")]
+    public IActionResult GoogleLogin()
     {
-    if (_refreshTokens.ContainsKey(req.RefreshToken))
-        _refreshTokens.Remove(req.RefreshToken);
-    return NoContent();  
+        var props = new AuthenticationProperties
+        {
+            RedirectUri = Url.Action("GoogleResponse", "Auth") // np. /api/auth/google-response
+        };
+        return Challenge(props, GoogleDefaults.AuthenticationScheme);
     }
+
+    [AllowAnonymous]
+    [HttpGet("google-response")]
+    public async Task<IActionResult> GoogleResponse()
+    {
+        var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        if (!result.Succeeded) return BadRequest("Google authentication failed");
+
+        // wyciągamy dane z tokena Google
+        var claims = result.Principal!.Claims;
+        var email  = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!;
+        var name   = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value ?? "";
+        var surname= claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value ?? "";
+
+        // sprawdź, czy mamy w lokalnej bazie
+        var user = _userService.GetByEmail(email)
+               ?? _userService.CreateExternalUser(new User {
+                    Email     = email,
+                    FirstName = name,
+                    LastName  = surname,
+                    Username  = email,
+                    PasswordHash = null    // bo OAuth
+                 });
+
+        // wygeneruj JWT z rolą
+        var token = GenerateJwt(user);
+
+        // zwróć do frontu (możesz przekierować do Vite z query)
+        return Ok(new {
+            Token = token,
+            Role  = user.Role
+        });
+    }
+
+    [HttpPost("logout")]
+     public IActionResult Logout([FromBody] LogoutRequest req)
+        {
+            if (_refreshTokens.ContainsKey(req.RefreshToken))
+                _refreshTokens.Remove(req.RefreshToken);
+            return NoContent();  
+        }
 }

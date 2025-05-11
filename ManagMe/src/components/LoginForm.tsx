@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 const API_URL = 'http://localhost:5000/api/auth';
+const GOOGLE_LOGIN_URL = 'http://localhost:5000/api/auth/google-login';
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -19,7 +20,6 @@ const LoginForm: React.FC = () => {
       const { token, refreshToken } = await res.json();
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
-      // przekieruj np. do “/”
       window.location.href = '/';
     } catch (err: any) {
       setError(err.message);
@@ -27,18 +27,34 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Login</label>
-        <input value={username} onChange={e => setUsername(e.target.value)} />
+    <div>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Login</label>
+          <input value={username} onChange={e => setUsername(e.target.value)} />
+        </div>
+        <div>
+          <label>Hasło</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+        </div>
+        <button type="submit">Zaloguj</button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </form>
+
+      <div style={{ marginTop: '1em', textAlign: 'center' }}>
+        <button
+          type="button"
+          className="google-button"
+          onClick={() => window.location.href = GOOGLE_LOGIN_URL}
+        >
+          Zaloguj przez Google
+        </button>
       </div>
-      <div>
-        <label>Hasło</label>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      </div>
-      <button type="submit">Zaloguj</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </form>
+    </div>
   );
 };
 
