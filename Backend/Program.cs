@@ -1,14 +1,13 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls("http://localhost:5000");
 
 // 1. CORS – zezwalamy na zapytania z frontendu
 builder.Services.AddCors(options =>
@@ -16,7 +15,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200")  // dostosuj adres/y frontendu
+            .WithOrigins("http://localhost:5173")  // dostosuj adres/y frontendu
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -54,6 +53,7 @@ builder.Services.AddAuthentication(options =>
 // Google OAuth (jeśli potrzebujesz)
 .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
 {
+    options.CallbackPath = "/auth/google-response"; 
     options.ClientId     = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });

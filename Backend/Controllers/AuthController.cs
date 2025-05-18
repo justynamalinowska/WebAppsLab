@@ -28,6 +28,7 @@ public class AuthController : ControllerBase
         _jwtSettings = opt.Value;
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public ActionResult<LoginResponse> Login([FromBody] LoginRequest req)
     {
