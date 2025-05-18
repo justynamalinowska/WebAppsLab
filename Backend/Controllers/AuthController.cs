@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Backend.Controllers;
 
@@ -92,18 +93,15 @@ public class AuthController : ControllerBase
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {
-        var props = new AuthenticationProperties
-        {
-            RedirectUri = Url.Action("GoogleResponse", "Auth") // np. /api/auth/google-response
-        };
-        return Challenge(props, GoogleDefaults.AuthenticationScheme);
+        return Challenge(new AuthenticationProperties(), GoogleDefaults.AuthenticationScheme);
     }
 
     [AllowAnonymous]
     [HttpGet("google-response")]
     public async Task<IActionResult> GoogleResponse()
     {
-        var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        var result = await HttpContext.AuthenticateAsync(
+                       CookieAuthenticationDefaults.AuthenticationScheme);
         if (!result.Succeeded) return BadRequest("Google authentication failed");
 
         // wyciągamy dane z tokena Google
@@ -126,10 +124,8 @@ public class AuthController : ControllerBase
         var token = GenerateJwt(user);
 
         // zwróć do frontu (możesz przekierować do Vite z query)
-        return Ok(new {
-            Token = token,
-            Role  = user.Role
-        });
+        var frontendUrl = "http://localhost:5173/auth-callback";
+        return Redirect($"{frontendUrl}?token={token}&role={user.Role}");
     }
 
     [HttpPost("logout")]
