@@ -1,76 +1,71 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Models;
-using Backend.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://localhost:5000");
-
-// 1) CORS: pozwalamy na requests z Twojego Vite (domyślnie http://localhost:5173)
-builder.Services.AddCors(o => o.AddPolicy("AllowFrontend", p =>
+// 1. CORS – zezwalamy na zapytania z frontendu
+builder.Services.AddCors(options =>
 {
-    p.WithOrigins("http://localhost:5173")
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-     .AllowCredentials();
-}));
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")  // dostosuj adres/y frontendu
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
-// 2) Wczytaj ustawienia JWT z appsettings.json
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+// 2. Wczytanie konfiguracji JwtSettings z appsettings.json
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
-var jwtSettings = jwtSection.Get<JwtSettings>();
-var key = Encoding.ASCII.GetBytes(jwtSettings!.SecretKey);
+var jwtSettings = jwtSection.Get<JwtSettings>()!;
+var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
-// 3) Dodaj autentykację JWT
+// 3. Authentication + Authorization
 builder.Services.AddAuthentication(options =>
 {
+    // domyślny schemat uwierzytelniania i wyzwania
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+// JWT Bearer
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
+        ValidateIssuer           = true,
+        ValidateAudience         = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ClockSkew = TimeSpan.Zero
+        ValidIssuer              = jwtSettings.Issuer,
+        ValidAudience            = jwtSettings.Audience,
+        IssuerSigningKey         = new SymmetricSecurityKey(key),
+        ClockSkew                = TimeSpan.Zero
     };
+})
+// Google OAuth (jeśli potrzebujesz)
+.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+{
+    options.ClientId     = builder.Configuration["Authentication:Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
-
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-    })
-    // JWT bearer
-    .AddJwtBearer()
-    // Google OAuth2
-    .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-    {
-        options.ClientId     = builder.Configuration["Authentication:Google:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-        options.SignInScheme = JwtBearerDefaults.AuthenticationScheme;
-    });
 
 builder.Services.AddAuthorization();
 
-// 4) Twoje serwisy (wkrótce stworzymy IUserService)
-builder.Services.AddSingleton<IUserService, UserService>();
-
+// 4. Kontrolery
 builder.Services.AddControllers();
+
 var app = builder.Build();
 
-// kolejność middleware jest istotna:
+// 5. Pipeline
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
