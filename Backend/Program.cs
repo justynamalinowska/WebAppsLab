@@ -2,14 +2,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Models;
-using Backend.Services;  // przestrzeń nazw z IUserService i UserService
+using Backend.Services; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +80,7 @@ var app = builder.Build();
 
 // 6) Pipeline
 app.UseCors("AllowFrontend");
+app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 
