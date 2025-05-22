@@ -33,6 +33,10 @@ const Home = () => {
   // Task CRUD
 //   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
+  const [theme, setTheme] = useState<"dark" | "light">(
+    (localStorage.getItem("theme") as "dark" | "light") || "dark"
+  );
+
 const navigate = useNavigate();
 
 const handleLogout = async () => {
@@ -81,6 +85,11 @@ const handleLogout = async () => {
     Api.getProjects().then(setProjectsList);
   }, []);
 
+useEffect(() => {
+  document.body.classList.remove("dark", "light");
+  document.body.classList.add(theme);
+  localStorage.setItem("theme", theme);
+}, [theme]);
 
   // Helpers do localStorage
   const saveProjects = (list: IProject[]) => {
@@ -182,7 +191,12 @@ const handleLogout = async () => {
     <>
       <article className="article-header">
         <h1>ManageMe</h1>
-        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Wyloguj</button></p> 
+        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Wyloguj</button> <button
+    className="theme-toggle"
+    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  >
+    {theme === "dark" ? "Jasny" : "Ciemny"}
+  </button></p> 
       </article>
       <section className="section-content-projects">
         {shownPage === PageEnum.list && (
