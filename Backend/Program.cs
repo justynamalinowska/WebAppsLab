@@ -46,8 +46,8 @@ builder.Services
   // a) Cookie do przechowywania ticketu OAuth i korelacji
   .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
   {
-      opts.Cookie.SameSite     = SameSiteMode.Lax;
-      opts.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+      opts.Cookie.SameSite     = SameSiteMode.None; 
+      opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
   })
   // b) JWT Bearer do zabezpieczania Twoich API
   .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts =>
@@ -74,8 +74,8 @@ builder.Services
       opts.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
 
       // korelacja/nonce też Lax, żeby działało na localhost
-      opts.CorrelationCookie.SameSite = SameSiteMode.Lax;
-      opts.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+      opts.CorrelationCookie.SameSite = SameSiteMode.None;
+      opts.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
       // Removed NonceCookie configuration as it is not supported by GoogleOptions
   });
 
