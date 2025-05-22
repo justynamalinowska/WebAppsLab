@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import './LoginForm.style.css'; 
+import './LoginForm.style.css';
+
+import { auth, googleProvider } from '../components/Firebase';
+import { signInWithRedirect } from 'firebase/auth';
 
 const API_URL = 'http://localhost:5000/api/auth';
-const GOOGLE_LOGIN_URL = 'http://localhost:5000/api/auth/google-login';
+const GOOGLE_LOGIN_URL = `${API_URL}/google-login`;
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -26,6 +29,10 @@ const LoginForm: React.FC = () => {
     } catch (err: any) {
       setError(err.message);
     }
+  };
+
+  const handleGoogleFirebaseLogin = () => {
+    signInWithRedirect(auth, googleProvider);
   };
 
   return (
@@ -66,6 +73,14 @@ const LoginForm: React.FC = () => {
           onClick={() => (window.location.href = GOOGLE_LOGIN_URL)}
         >
           Zaloguj przez Google
+        </button>
+
+        <button
+          type="button"
+          className="btn firebase-google"
+          onClick={handleGoogleFirebaseLogin}
+        >
+          Zaloguj przez Google z Firebase
         </button>
       </form>
     </div>

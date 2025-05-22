@@ -1,32 +1,109 @@
-import { StrictMode } from 'react';
+import React, { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate
+} from 'react-router-dom';
 import './index.css';
 
 import Home from './components/Home';
 import LoginForm from './components/LoginForm';
 
-const root = createRoot(document.getElementById('root')!);
+import { auth } from './components/Firebase';
+import {
+  onAuthStateChanged,
+  getRedirectResult,
+  signOut,
+  User
+} from 'firebase/auth';
 
-root.render(
+const MainAppContent: React.FC = () => {
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const idToken = await result.user.getIdToken();
+          const res = await fetch('http://localhost:5000/api/auth/google-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ idToken }),
+          });
+          if (res.ok) {
+            const { token, refreshToken } = await res.json();
+            localStorage.setItem('token', token);
+            localStorage.setItem('refreshToken', refreshToken);
+            navigate('/', { replace: true });
+          }
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        setLoading(false);
+      });
+      
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setFirebaseUser(u);
+      setLoading(false);
+    });
+    return unsub;
+  }, [navigate]);
+
+  if (loading) return <div>Ładowanie…</div>;
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          localStorage.getItem('token') ? (
+            <Navigate to="/" replace />
+          ) : (
+            <LoginForm />
+          )
+        }
+      />
+
+      <Route
+        path="/"
+        element={
+          localStorage.getItem('token') ? (
+            <>
+              {firebaseUser && (
+                <header style={{ padding: '1rem', textAlign: 'right' }}>
+                  <span style={{ marginRight: '1rem' }}>
+                    Witaj, {firebaseUser.displayName}
+                  </span>
+                  <button onClick={() => signOut(auth)}>Wyloguj</button>
+                </header>
+              )}
+              <Home />
+            </>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
+const MainApp: React.FC = () => (
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginForm />} />
-
-        <Route
-          path="/"
-          element={
-            localStorage.getItem('token') ? (
-              <Home />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <MainAppContent />
     </BrowserRouter>
   </StrictMode>
 );
+
+const root = createRoot(document.getElementById('root')!);
+root.render(<MainApp />);
