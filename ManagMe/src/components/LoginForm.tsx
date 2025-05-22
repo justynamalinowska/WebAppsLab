@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './LoginForm.style.css';  // <-- doklej ten plik CSS obok .tsx
 
 const API_URL = 'http://localhost:5000/api/auth';
 const GOOGLE_LOGIN_URL = 'http://localhost:5000/api/auth/google-login';
@@ -14,6 +15,7 @@ const LoginForm: React.FC = () => {
       const res = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -27,33 +29,44 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Login</label>
-          <input value={username} onChange={e => setUsername(e.target.value)} />
-        </div>
-        <div>
-          <label>Hasło</label>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Logowanie</h2>
+
+        <div className="form-group">
+          <label htmlFor="username">Login</label>
           <input
+            id="username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Hasło</label>
+          <input
+            id="password"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            required
           />
         </div>
-        <button type="submit">Zaloguj</button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
 
+        {error && <p className="error">{error}</p>}
 
-      <div style={{ marginTop: '1em', textAlign: 'center' }}>
+        <button type="submit" className="btn primary">
+          Zaloguj
+        </button>
+
         <button
           type="button"
-          className="google-button"
-          onClick={() => window.location.href = GOOGLE_LOGIN_URL}
+          className="btn google"
+          onClick={() => (window.location.href = GOOGLE_LOGIN_URL)}
         >
           Zaloguj przez Google
         </button>
-      </div>
       </form>
     </div>
   );
