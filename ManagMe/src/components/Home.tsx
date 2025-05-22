@@ -1,4 +1,3 @@
-// src/components/Home.tsx
 import "./Home.style.css";
 import { useEffect, useState } from "react";
 import { IProject, PageEnum } from "./Project.type";
@@ -10,156 +9,139 @@ import AddStory from "./AddStory";
 import EditStory from "./EditStory";
 import KanbanBoard from "./KanbanBoard";
 import AddTask from "./AddTask";
-// import EditTask from "./EditTask";
-import Api from "./Api";
+import Api from "./Api";                     
 import { IStory } from "./Story.type";
 import { ITask } from "./Task.type";
 import IUser from "./User.type";
 import { useNavigate } from "react-router-dom";
-import {fetchWithAuth} from "./BackendApi";
+import { fetchWithAuth } from "./BackendApi";
 
-const Home = () => {
-  // Projekty
-  const [projectList, setProjectsList] = useState<IProject[]>([]);
+const Home: React.FC = () => {
+  const [projectList, setProjectList] = useState<IProject[]>([]);
   const [currentProject, setCurrentProject] = useState<IProject | null>(null);
 
-  // Nawigacja
   const [shownPage, setShownPage] = useState<PageEnum>(PageEnum.list);
   const [dataToEditProject, setDataToEditProject] = useState<IProject>({} as IProject);
 
-  // Story
   const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
-
-  // Task CRUD
-//   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
+  const [dataToEditStory, setDataToEditStory] = useState<IStory>({} as IStory);
 
   const [theme, setTheme] = useState<"dark" | "light">(
     (localStorage.getItem("theme") as "dark" | "light") || "dark"
   );
 
-const navigate = useNavigate();
+  const [user, setUser] = useState<IUser|null>(null);
+  const navigate = useNavigate();
 
-const handleLogout = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
-
-  try {
-    if (refreshToken) {
-      // jeśli dodałeś endpoint POST /auth/logout, wyślij tam request z auth
-      await fetchWithAuth("/auth/logout", {
-        method: "POST",
-        body: JSON.stringify({ refreshToken })
-      });
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+  
+    try {
+      if (refreshToken) {
+        await fetchWithAuth("/auth/logout", {
+          method: "POST",
+          body: JSON.stringify({ refreshToken })
+        });
+      }
+    } catch (err) {
+      console.error("Błąd przy wylogowaniu:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      navigate("/login", { replace: true });
     }
-  } catch (err) {
-    console.error("Błąd przy wylogowaniu:", err);
-  } finally {
-    // niezależnie od wyniku żądania, czyścimy dane i przekierowujemy
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    navigate("/login", { replace: true });
-  }
-};
-  const [user, setUser] = useState<IUser | null>(null);
-  // // Przykładowy użytkownik
-  // const [user] = useState<IUser>({
-  //   id: "1",
-  //   firstName: "Justyna",
-  //   lastName: "Malinowska",
-  //   Role: "Admin",
-  // });
+  };
+    // const [user, setUser] = useState<IUser | null>(null);
+    // const [user] = useState<IUser>({
+    //   id: "1",
+    //   firstName: "Justyna",
+    //   lastName: "Malinowska",
+    //   Role: "Admin",
+    // });
 
-  // Wczytaj projekty
   useEffect(() => {
     (async () => {
       try {
         const res = await fetchWithAuth("/auth/me");
         if (!res.ok) throw new Error();
-        const me: IUser = await res.json();
-        setUser(me);
+        setUser(await res.json());
       } catch {
         navigate("/login", { replace: true });
       }
     })();
+    loadProjects();
+  }, [navigate]);
 
-    // zamiast Api.getProjects → BackendApi.getProjects()
-    Api.getProjects().then(setProjectsList);
-  }, []);
+  useEffect(() => {
+    document.body.classList.toggle("dark", theme === "dark");
+    document.body.classList.toggle("light", theme === "light");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
-useEffect(() => {
-  document.body.classList.remove("dark", "light");
-  document.body.classList.add(theme);
-  localStorage.setItem("theme", theme);
-}, [theme]);
-
-  // Helpers do localStorage
-  const saveProjects = (list: IProject[]) => {
-    setProjectsList(list);
-    window.localStorage.setItem("projects", JSON.stringify(list));
-  };
-  const saveStories = (stories: IStory[]) => {
-    if (!currentProject) return;
-    const updated = { ...currentProject, stories };
-    const updatedList = projectList.map(p =>
-      p.id === updated.id ? updated : p
-    );
-    saveProjects(updatedList);
-    setCurrentProject(updated);
+  const loadProjects = async () => {
+    const projs = await Api.getProjects();
+    setProjectList(projs);
   };
 
-  // Generatory ID
   const nextProjId = () =>
-    projectList.length ? Math.max(...projectList.map(p => p.id)) + 1 : 1;
-
-  // **GLOBALNY** generator dla story — unikalne w całej aplikacji
+    projectList.length ? Math.max(...projectList.map(p => p.id))+1 : 1;
   const nextStoryId = () => {
-    const allStories = projectList.flatMap(p => p.stories || []);
-    return allStories.length
-      ? Math.max(...allStories.map(s => s.id)) + 1
-      : 1;
+    const allS = projectList.flatMap(p=>p.stories||[]);
+    return allS.length ? Math.max(...allS.map(s=>s.id))+1 : 1;
+  };
+  const nextTaskId = async () => {
+    const allT = await Api.getTasks();
+    return allT.length ? Math.max(...allT.map(t=>t.id))+1 : 1;
   };
 
-  // PROJECT HANDLERS
-  const addProject = (p: IProject) => {
-    saveProjects([...projectList, { ...p, id: nextProjId(), stories: [] }]);
+  const addProject = async (p: IProject) => {
+    await Api.addProject({ ...p, id: nextProjId(), stories: [] });
+    await loadProjects();
     setShownPage(PageEnum.list);
   };
   const startEditProject = (p: IProject) => {
     setDataToEditProject(p);
     setShownPage(PageEnum.edit);
   };
-  const updateProject = (p: IProject) => {
-    saveProjects(projectList.map(x => x.id === p.id ? p : x));
+  const updateProject = async (p: IProject) => {
+    await Api.updateProject(p);
+    await loadProjects();
     setShownPage(PageEnum.list);
   };
-  const deleteProject = (p: IProject) => {
-    saveProjects(projectList.filter(x => x.id !== p.id));
+  const deleteProject = async (p: IProject) => {
+    await Api.deleteProject(p.id);
+    await loadProjects();
   };
   const selectProject = (p: IProject) => {
-    setCurrentProject({ ...p, stories: p.stories || [] });
-    Api.setCurrentProject(p);
+    setCurrentProject(p);
     setShownPage(PageEnum.stories);
   };
 
-  // STORY HANDLERS
-  const addStory = (s: IStory) => {
+  const addStory = async (s: IStory) => {
     if (!currentProject) return;
-    saveStories([
-      ...(currentProject.stories || []),
-      { ...s, id: nextStoryId(), projectId: currentProject.id },
-    ]);
+    await Api.addStory({ ...s, id: nextStoryId(), projectId: currentProject.id });
+    await loadProjects();
+    setCurrentProject(
+      (await Api.getProjects()).find(pr=>pr.id===currentProject.id)!);
     setShownPage(PageEnum.stories);
   };
   const startEditStory = (s: IStory) => {
-    saveStories(
-      currentProject!.stories!.map(x => x.id === s.id ? s : x)
-    );
+    setDataToEditStory(s);
     setSelectedStory(s);
     setShownPage(PageEnum.editStory);
   };
-  const deleteStory = (s: IStory) => {
-    saveStories(
-      currentProject!.stories!.filter(x => x.id !== s.id)
-    );
+  const updateStory = async (s: IStory) => {
+    await Api.updateStory(s);
+    await loadProjects();
+    setCurrentProject(
+      (await Api.getProjects()).find(pr=>pr.id===currentProject?.id)!);
+    setShownPage(PageEnum.stories);
+  };
+  const deleteStory = async (s: IStory) => {
+    await Api.deleteStory(s.id);
+    await loadProjects();
+    setCurrentProject(
+      (await Api.getProjects()).find(pr=>pr.id===currentProject?.id)!);
     setShownPage(PageEnum.stories);
   };
   const openKanban = (s: IStory) => {
@@ -167,24 +149,14 @@ useEffect(() => {
     setShownPage(PageEnum.kanban);
   };
 
-  // TASK HANDLERS
   const openAddTask = () => setShownPage(PageEnum.addTask);
   const addTask = async (t: ITask) => {
-    await Api.addTask(t);
+    await Api.addTask({ ...t, id: await nextTaskId() });
     setShownPage(PageEnum.kanban);
   };
-//   const openEditTask = (t: ITask) => {
-//     setTaskToEdit(t);
-//     setShownPage(PageEnum.editTask);
-//   };
-//   const updateTask = async (t: ITask) => {
-//     await Api.updateTask(t);
-//     setShownPage(PageEnum.kanban);
-//   };
 
-  // Wracanie
-  const backToList = () => setShownPage(PageEnum.list);
-  const backToStories = () => setShownPage(PageEnum.stories);
+  const backToList   = () => setShownPage(PageEnum.list);
+  const backToStories= () => setShownPage(PageEnum.stories);
   const backToKanban = () => setShownPage(PageEnum.kanban);
 
   return (
@@ -194,12 +166,12 @@ useEffect(() => {
         <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Logout</button> <button
     className="theme-toggle"
     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-  >
+    >
     {theme === "dark" ? "Light" : "Dark"}
-  </button></p> 
-      </article>
+    </button></p> 
+    </article>
       <section className="section-content-projects">
-        {shownPage === PageEnum.list && (
+        {shownPage===PageEnum.list && (
           <ProjectList
             list={projectList}
             onSelect={selectProject}
@@ -208,23 +180,20 @@ useEffect(() => {
             setShownPage={setShownPage}
           />
         )}
-
-        {shownPage === PageEnum.add && (
+        {shownPage===PageEnum.add && (
           <AddProject
             onBackBtnClickHnd={backToList}
             onSubmitClickHnd={addProject}
           />
         )}
-
-        {shownPage === PageEnum.edit && (
+        {shownPage===PageEnum.edit && (
           <EditProject
             data={dataToEditProject}
             onBackBtnClickHnd={backToList}
             onUpdateClickHnd={updateProject}
           />
         )}
-
-        {shownPage === PageEnum.stories && currentProject && (
+        {shownPage===PageEnum.stories && currentProject && (
           <StoryList
             project={currentProject}
             stories={currentProject.stories!}
@@ -235,8 +204,7 @@ useEffect(() => {
             onPageChange={setShownPage}
           />
         )}
-
-        {shownPage === PageEnum.addStory && currentProject && (
+        {shownPage===PageEnum.addStory && currentProject && (
           <AddStory
             project={currentProject}
             userId={user!.id}
@@ -244,38 +212,27 @@ useEffect(() => {
             onSubmitClickHnd={addStory}
           />
         )}
-
-        {shownPage === PageEnum.editStory && selectedStory && (
+        {shownPage===PageEnum.editStory && selectedStory && (
           <EditStory
-            data={selectedStory}
+            data={dataToEditStory}
             onBackBtnClickHnd={backToStories}
-            onUpdateClickHnd={startEditStory}
+            onUpdateClickHnd={updateStory}
           />
         )}
-
-        {shownPage === PageEnum.kanban && selectedStory && (
+        {shownPage===PageEnum.kanban && selectedStory && (
           <KanbanBoard
             story={selectedStory}
             onBack={backToStories}
             onAdd={openAddTask}
           />
         )}
-
-        {shownPage === PageEnum.addTask && selectedStory && (
+        {shownPage===PageEnum.addTask && selectedStory && (
           <AddTask
             storyId={selectedStory.id}
             onBackBtnClickHnd={backToKanban}
             onSubmitClickHnd={addTask}
           />
         )}
-
-        {/* {shownPage === PageEnum.editTask && taskToEdit && (
-          <EditTask
-            data={taskToEdit}
-            onBackBtnClickHnd={backToKanban}
-            onUpdateClickHnd={updateTask}
-          />
-        )} */}
       </section>
     </>
   );

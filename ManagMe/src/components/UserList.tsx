@@ -1,11 +1,11 @@
 import IUser from "./User.type";
 
 const users: IUser[] = [
-  { id: "1", firstName: "Justyna", lastName: "Malinowska", Role: "Admin" }, 
-  { id: "2", firstName: "Krzysztof", lastName: "Krawczyk", Role: "Developer" }, 
-  { id: "3", firstName: "Jan", lastName: "Kowalski", Role: "DevOps" }, 
-  { id: "4", firstName: "Anna", lastName: "Nowak", Role: "Developer" }, 
-  { id: "5", firstName: "Piotr", lastName: "Wiśniewski", Role: "DevOps" },
+  { id: 1, username: "Justyna", email: "Justyna@gmail.com", Role: "Admin" }, 
+  { id: 2, username: "Robert", email: "Robert@gmail.com", Role: "Developer" }, 
+  { id: 3, username: "Alex", email: "Alex@gmail.com", Role: "DevOps" }, 
+  { id: 4, username: "Aga", email: "Aga@gmail.com", Role: "Developer" }, 
+  { id: 5, username: "Lukasz", email: "Lukasz@gmail.com", Role: "DevOps" },
 ];
 
 export default users;
