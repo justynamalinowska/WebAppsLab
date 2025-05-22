@@ -43,17 +43,18 @@ const LoginForm: React.FC = () => {
         </div>
         <button type="submit">Zaloguj</button>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-      </form>
+
 
       <div style={{ marginTop: '1em', textAlign: 'center' }}>
         <button
           type="button"
           className="google-button"
-          onClick={() => window.location.href = 'http://localhost:5000/api/auth/google-login'}
+          onClick={() => window.location.href = GOOGLE_LOGIN_URL}
         >
           Zaloguj przez Google
         </button>
       </div>
+      </form>
     </div>
   );
 };

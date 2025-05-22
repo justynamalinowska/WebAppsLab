@@ -9,7 +9,7 @@
       "Backend/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.0.3",
-          "Microsoft.AspNetCore.Authentication.Google": "9.0.4",
+          "Microsoft.AspNetCore.Authentication.Google": "9.0.5",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.4",
           "Microsoft.AspNetCore.OpenApi": "9.0.4",
           "Swashbuckle.AspNetCore": "8.1.1"
@@ -26,11 +26,11 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Authentication.Google/9.0.4": {
+      "Microsoft.AspNetCore.Authentication.Google/9.0.5": {
         "runtime": {
           "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.dll": {
-            "assemblyVersion": "9.0.4.0",
-            "fileVersion": "9.0.425.16403"
+            "assemblyVersion": "9.0.5.0",
+            "fileVersion": "9.0.525.22904"
           }
         }
       },
@@ -194,12 +194,12 @@
       "path": "bcrypt.net-next/4.0.3",
       "hashPath": "bcrypt.net-next.4.0.3.nupkg.sha512"
     },
-    "Microsoft.AspNetCore.Authentication.Google/9.0.4": {
+    "Microsoft.AspNetCore.Authentication.Google/9.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-/fAEXx6E3xT8lQjepDqqrd7cqh783+nbvy8gW1bdLWdKoM7l7F8invNRjHz7r1kViffTJw8KGT1SHIbihEhErA==",
-      "path": "microsoft.aspnetcore.authentication.google/9.0.4",
-      "hashPath": "microsoft.aspnetcore.authentication.google.9.0.4.nupkg.sha512"
+      "sha512": "sha512-K6b2OX3eY4RAwySFxfOTlBNvPw8OYRWTYKV7XFGaYhKQaaq3ooxsg0tzHsH/UxwK7SDTpnXiHYVcbMBFFlYmxw==",
+      "path": "microsoft.aspnetcore.authentication.google/9.0.5",
+      "hashPath": "microsoft.aspnetcore.authentication.google.9.0.5.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication.JwtBearer/9.0.4": {
       "type": "package",

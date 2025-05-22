@@ -76,8 +76,7 @@ builder.Services
       // korelacja/nonce też Lax, żeby działało na localhost
       opts.CorrelationCookie.SameSite = SameSiteMode.Lax;
       opts.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    //   opts.NonceCookie.SameSite = SameSiteMode.Lax;
-    //   opts.NonceCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+      // Removed NonceCookie configuration as it is not supported by GoogleOptions
   });
 
 builder.Services.AddAuthorization();
@@ -85,7 +84,6 @@ builder.Services.AddAuthorization();
 // --- 4) Twoje serwisy i kontrolery
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
 
 var app = builder.Build();
 

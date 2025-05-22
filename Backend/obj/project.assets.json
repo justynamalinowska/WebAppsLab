@@ -15,7 +15,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Authentication.Google/9.0.4": {
+      "Microsoft.AspNetCore.Authentication.Google/9.0.5": {
         "type": "package",
         "compile": {
           "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.dll": {
@@ -304,10 +304,10 @@
         "readme.md"
       ]
     },
-    "Microsoft.AspNetCore.Authentication.Google/9.0.4": {
-      "sha512": "/fAEXx6E3xT8lQjepDqqrd7cqh783+nbvy8gW1bdLWdKoM7l7F8invNRjHz7r1kViffTJw8KGT1SHIbihEhErA==",
+    "Microsoft.AspNetCore.Authentication.Google/9.0.5": {
+      "sha512": "K6b2OX3eY4RAwySFxfOTlBNvPw8OYRWTYKV7XFGaYhKQaaq3ooxsg0tzHsH/UxwK7SDTpnXiHYVcbMBFFlYmxw==",
       "type": "package",
-      "path": "microsoft.aspnetcore.authentication.google/9.0.4",
+      "path": "microsoft.aspnetcore.authentication.google/9.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -315,7 +315,7 @@
         "THIRD-PARTY-NOTICES.TXT",
         "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.dll",
         "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.xml",
-        "microsoft.aspnetcore.authentication.google.9.0.4.nupkg.sha512",
+        "microsoft.aspnetcore.authentication.google.9.0.5.nupkg.sha512",
         "microsoft.aspnetcore.authentication.google.nuspec"
       ]
     },
@@ -839,7 +839,7 @@
   "projectFileDependencyGroups": {
     "net9.0": [
       "BCrypt.Net-Next >= 4.0.3",
-      "Microsoft.AspNetCore.Authentication.Google >= 9.0.4",
+      "Microsoft.AspNetCore.Authentication.Google >= 9.0.5",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 9.0.4",
       "Microsoft.AspNetCore.OpenApi >= 9.0.4",
       "Swashbuckle.AspNetCore >= 8.1.1"
@@ -894,7 +894,7 @@
           },
           "Microsoft.AspNetCore.Authentication.Google": {
             "target": "Package",
-            "version": "[9.0.4, )"
+            "version": "[9.0.5, )"
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",
