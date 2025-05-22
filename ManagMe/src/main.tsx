@@ -71,23 +71,13 @@ const MainAppContent: React.FC = () => {
         }
       />
 
-      <Route
+<Route
         path="/"
         element={
           localStorage.getItem('token') ? (
-            <>
-              {firebaseUser && (
-                <header style={{ padding: '1rem', textAlign: 'right' }}>
-                  <span style={{ marginRight: '1rem' }}>
-                    Witaj, {firebaseUser.displayName}
-                  </span>
-                  <button onClick={() => signOut(auth)}>Wyloguj</button>
-                </header>
-              )}
-              <Home />
-            </>
+            <Home />
           ) : (
-            <Navigate to="/login" replace />
+            <Navigate to="/" replace />
           )
         }
       />
