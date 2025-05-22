@@ -29,7 +29,6 @@ public class AuthController : ControllerBase
         _jwtSettings = opts.Value;
     }
 
-    // ========== Zwykłe logowanie ==========
     [HttpPost("login")]
     public ActionResult<LoginResponse> Login([FromBody] LoginRequest req)
     {
@@ -76,12 +75,10 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
-    // ========== Google OAuth2 ==========
     [AllowAnonymous]
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {
-        // wykonaj Challenge – przekieruje do Google
         var props = new AuthenticationProperties
         {
             RedirectUri = Url.Action(nameof(GoogleResponse), "Auth")
@@ -93,18 +90,15 @@ public class AuthController : ControllerBase
     [HttpGet("google-response")]
     public async Task<IActionResult> GoogleResponse()
     {
-        // odczytaj wynik z cookie-scheme
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         if (!result.Succeeded)
             return BadRequest("Google authentication failed");
 
-        // pobierz dane
         var claims  = result.Principal!.Claims;
         var email   = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!;
         var name    = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value  ?? "";
         var surname = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value    ?? "";
 
-        // znajdź lub utwórz usera w Twojej bazie
         var user = _userService.GetByEmail(email)
                    ?? _userService.CreateExternalUser(new User {
                        Email       = email,
@@ -114,20 +108,17 @@ public class AuthController : ControllerBase
                        PasswordHash= null
                    });
 
-        // wygeneruj własny JWT
         var jwt = GenerateJwt(user);
 
-        // przekieruj na frontend z tokenem (możesz zamiast Google.com dać swój Vite)
         var frontendUrl = $"http://localhost:5173?token={jwt}&role={user.Role}";
         return Redirect(frontendUrl);
     }
 
-    // ======== Helpers ========
     private string GenerateJwt(User user)
     {
         var keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
-        var handler  = new JwtSecurityTokenHandler();
-        var desc     = new SecurityTokenDescriptor
+        var handler = new JwtSecurityTokenHandler();
+        var desc = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
             {
@@ -135,9 +126,9 @@ public class AuthController : ControllerBase
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email ?? "")
             }),
-            Expires            = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-            Issuer             = _jwtSettings.Issuer,
-            Audience           = _jwtSettings.Audience,
+            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            Issuer = _jwtSettings.Issuer,
+            Audience = _jwtSettings.Audience,
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(keyBytes),
                 SecurityAlgorithms.HmacSha256

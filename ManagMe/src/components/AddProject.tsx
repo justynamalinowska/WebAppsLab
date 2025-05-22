@@ -1,5 +1,5 @@
 import "./Project.Form.style.css"
-import React, { useState } from "react";
+import { useState } from "react";
 import { IProject } from "./Project.type";
 
 type Props = {

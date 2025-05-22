@@ -31,7 +31,7 @@ const TaskModal = ({ task, onClose, onUpdate }: Props) => {
     });
   };
 
-  const assignedUser = users.find(u => u.id === assignedId) as IUser;
+  const assignedUser = users.find(u => u.id === Number(assignedId)) as IUser;
 
   return (
     <div id="myModal" className="modal">
@@ -47,7 +47,7 @@ const TaskModal = ({ task, onClose, onUpdate }: Props) => {
         <p>
           Assigned To:{" "}
           {assignedUser
-            ? `${assignedUser.firstName} ${assignedUser.lastName}`
+            ? `${assignedUser.username}`
             : "-"}
         </p>
 
@@ -63,7 +63,7 @@ const TaskModal = ({ task, onClose, onUpdate }: Props) => {
                 .filter(u => u.Role === "Developer" || u.Role === "DevOps")
                 .map(u => (
                   <option key={u.id} value={u.id}>
-                    {u.firstName} {u.lastName} ({u.Role})
+                    {u.username}({u.Role})
                   </option>
                 ))}
             </select>

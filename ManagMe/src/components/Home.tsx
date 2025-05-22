@@ -1,5 +1,3 @@
-// src/components/Home.tsx
-
 import "./Home.style.css";
 import { useEffect, useState } from "react";
 import { IProject, PageEnum } from "./Project.type";
@@ -11,7 +9,7 @@ import AddStory from "./AddStory";
 import EditStory from "./EditStory";
 import KanbanBoard from "./KanbanBoard";
 import AddTask from "./AddTask";
-import Api from "./Api";                     // <- Api deleguje do FirestoreApi
+import Api from "./Api";                     
 import { IStory } from "./Story.type";
 import { ITask } from "./Task.type";
 import IUser from "./User.type";
@@ -28,13 +26,12 @@ const Home: React.FC = () => {
   const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
   const [dataToEditStory, setDataToEditStory] = useState<IStory>({} as IStory);
 
-  const [theme, setTheme] = useState<"dark"|"light">(
+  const [theme] = useState<"dark"|"light">(
     (localStorage.getItem("theme") as "dark"|"light") || "dark"
   );
   const [user, setUser] = useState<IUser|null>(null);
   const navigate = useNavigate();
 
-  // — auth + pierwsze ładowanie projektów —
   useEffect(() => {
     (async () => {
       try {
@@ -48,20 +45,17 @@ const Home: React.FC = () => {
     loadProjects();
   }, [navigate]);
 
-  // motyw
   useEffect(() => {
     document.body.classList.toggle("dark", theme === "dark");
     document.body.classList.toggle("light", theme === "light");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // — helper do fetcha projektów —
   const loadProjects = async () => {
     const projs = await Api.getProjects();
     setProjectList(projs);
   };
 
-  // — generatory ID —
   const nextProjId = () =>
     projectList.length ? Math.max(...projectList.map(p => p.id))+1 : 1;
   const nextStoryId = () => {
@@ -73,7 +67,6 @@ const Home: React.FC = () => {
     return allT.length ? Math.max(...allT.map(t=>t.id))+1 : 1;
   };
 
-  // — Project CRUD —
   const addProject = async (p: IProject) => {
     await Api.addProject({ ...p, id: nextProjId(), stories: [] });
     await loadProjects();
@@ -97,7 +90,6 @@ const Home: React.FC = () => {
     setShownPage(PageEnum.stories);
   };
 
-  // — Story CRUD —
   const addStory = async (s: IStory) => {
     if (!currentProject) return;
     await Api.addStory({ ...s, id: nextStoryId(), projectId: currentProject.id });
@@ -130,14 +122,12 @@ const Home: React.FC = () => {
     setShownPage(PageEnum.kanban);
   };
 
-  // — Task CRUD —
   const openAddTask = () => setShownPage(PageEnum.addTask);
   const addTask = async (t: ITask) => {
     await Api.addTask({ ...t, id: await nextTaskId() });
     setShownPage(PageEnum.kanban);
   };
 
-  // — powroty —
   const backToList   = () => setShownPage(PageEnum.list);
   const backToStories= () => setShownPage(PageEnum.stories);
   const backToKanban = () => setShownPage(PageEnum.kanban);

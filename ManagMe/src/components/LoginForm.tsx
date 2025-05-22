@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './LoginForm.style.css';  // <-- doklej ten plik CSS obok .tsx
+import './LoginForm.style.css'; 
 
 const API_URL = 'http://localhost:5000/api/auth';
 const GOOGLE_LOGIN_URL = 'http://localhost:5000/api/auth/google-login';
