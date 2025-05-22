@@ -26,11 +26,38 @@ const Home: React.FC = () => {
   const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
   const [dataToEditStory, setDataToEditStory] = useState<IStory>({} as IStory);
 
-  const [theme] = useState<"dark"|"light">(
-    (localStorage.getItem("theme") as "dark"|"light") || "dark"
+  const [theme, setTheme] = useState<"dark" | "light">(
+    (localStorage.getItem("theme") as "dark" | "light") || "dark"
   );
+
   const [user, setUser] = useState<IUser|null>(null);
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+  
+    try {
+      if (refreshToken) {
+        await fetchWithAuth("/auth/logout", {
+          method: "POST",
+          body: JSON.stringify({ refreshToken })
+        });
+      }
+    } catch (err) {
+      console.error("Błąd przy wylogowaniu:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      navigate("/login", { replace: true });
+    }
+  };
+    // const [user, setUser] = useState<IUser | null>(null);
+    // const [user] = useState<IUser>({
+    //   id: "1",
+    //   firstName: "Justyna",
+    //   lastName: "Malinowska",
+    //   Role: "Admin",
+    // });
 
   useEffect(() => {
     (async () => {
@@ -134,7 +161,15 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <article className="article-header">…</article>
+      <article className="article-header">
+        <h1>ManageMe</h1>
+        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Logout</button> <button
+    className="theme-toggle"
+    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
+    {theme === "dark" ? "Light" : "Dark"}
+    </button></p> 
+    </article>
       <section className="section-content-projects">
         {shownPage===PageEnum.list && (
           <ProjectList
