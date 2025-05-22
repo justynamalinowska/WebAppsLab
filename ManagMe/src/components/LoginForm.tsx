@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import './LoginForm.style.css';  // <-- doklej ten plik CSS obok .tsx
 
 const API_URL = 'http://localhost:5000/api/auth';
+const GOOGLE_LOGIN_URL = 'http://localhost:5000/api/auth/google-login';
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -13,13 +15,13 @@ const LoginForm: React.FC = () => {
       const res = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) throw new Error(await res.text());
       const { token, refreshToken } = await res.json();
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
-      // przekieruj np. do “/”
       window.location.href = '/';
     } catch (err: any) {
       setError(err.message);
@@ -27,18 +29,46 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Login</label>
-        <input value={username} onChange={e => setUsername(e.target.value)} />
-      </div>
-      <div>
-        <label>Hasło</label>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      </div>
-      <button type="submit">Zaloguj</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </form>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Logowanie</h2>
+
+        <div className="form-group">
+          <label htmlFor="username">Login</label>
+          <input
+            id="username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Hasło</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && <p className="error">{error}</p>}
+
+        <button type="submit" className="btn primary">
+          Zaloguj
+        </button>
+
+        <button
+          type="button"
+          className="btn google"
+          onClick={() => (window.location.href = GOOGLE_LOGIN_URL)}
+        >
+          Zaloguj przez Google
+        </button>
+      </form>
+    </div>
   );
 };
 

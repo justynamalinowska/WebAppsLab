@@ -1,57 +1,46 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
+# -----------------
+# Źródła .NET / Visual Studio
+# -----------------
 *.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+[Bb]in/
+[Oo]bj/
+Properties/launchSettings.json
 
-* `logs/`
-* `*.log`
-* `npm-debug.log*`
-* `yarn-debug.log*`
-* `yarn-error.log*`
-* `pnpm-debug.log*`
-* `lerna-debug.log*`
-* `coverage/`
-* `node_modules/`
-* `dist/`
-* `dist-ssr/`
-* `.cache/`
-* `.env`
-* `.env.*`
-* `!.env.example`
-* `**/bin/`
-* `**/obj/`
-* `.vs/`
-* `*.user`
-* `*.suo`
-* `*.userosscache`
-* `*.sln.docstates`
-* `.idea/`
-* `.vscode/`
-* `!.vscode/extensions.json`
-* `.DS_Store`
-* `Thumbs.db`
-* `*.tmp`
-* `*.temp`
-* `*.db`
-* `*.log.*`
-* '*.cache'
+# -----------------
+# Build-artefakty i logi
+# -----------------
+*.dll
+*.pdb
+*.log
+logs/
+
+# -----------------
+# Node / JS
+# -----------------
+node_modules/
+dist/
+dist-ssr/
+.cache/
+
+# -----------------
+# Konfiguracje i pliki tymczasowe
+# -----------------
+.env
+.env.*
+!.env.example
+*.tmp
+*.temp
+*.db
+
+# -----------------
+# IDE / OS
+# -----------------
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

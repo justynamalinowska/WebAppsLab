@@ -1,64 +1,108 @@
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Models;
 using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- (opcjonalnie) uruchom pod http://localhost:5000
 builder.WebHost.UseUrls("http://localhost:5000");
 
-// 1) CORS: pozwalamy na requests z Twojego Vite (domyślnie http://localhost:5173)
-builder.Services.AddCors(o => o.AddPolicy("AllowFrontend", p =>
+// --- 1) CORS: pozwól na AJAX + cookies z frontu
+builder.Services.AddCors(opts =>
 {
-    p.WithOrigins("http://localhost:5173")
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-     .AllowCredentials();
-}));
-
-// 2) Wczytaj ustawienia JWT z appsettings.json
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-var jwtSection = builder.Configuration.GetSection("JwtSettings");
-builder.Services.Configure<JwtSettings>(jwtSection);
-var jwtSettings = jwtSection.Get<JwtSettings>();
-var key = Encoding.ASCII.GetBytes(jwtSettings!.SecretKey);
-
-// 3) Dodaj autentykację JWT
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ClockSkew = TimeSpan.Zero
-    };
+    opts.AddPolicy("AllowFrontend", p =>
+        p.WithOrigins("http://localhost:5173")   // 👉 Twój Vite/CRA URL
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+         .AllowCredentials()
+    );
 });
+
+// --- 2) Wczytaj JwtSettings z appsettings.json
+var jwtSec = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSec);
+var jwtSettings = jwtSec.Get<JwtSettings>()!;
+var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+
+// --- 3) Authentication + Authorization
+builder.Services
+  .AddAuthentication(options =>
+  {
+    // Cookie będzie trzymać stan OAuth (state, correlation)
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme       = CookieAuthenticationDefaults.AuthenticationScheme;
+    // Jeśli wywołasz Challenge() bez schematu, domyślnie pójdzie na Google
+    options.DefaultChallengeScheme    = GoogleDefaults.AuthenticationScheme;
+  })
+  // a) Cookie do przechowywania ticketu OAuth i korelacji
+  .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
+  {
+      opts.Cookie.SameSite     = SameSiteMode.None; 
+      opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+  })
+  // b) JWT Bearer do zabezpieczania Twoich API
+  .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts =>
+  {
+      opts.RequireHttpsMetadata = false;
+      opts.SaveToken            = true;
+      opts.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuer           = true,
+          ValidateAudience         = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer              = jwtSettings.Issuer,
+          ValidAudience            = jwtSettings.Audience,
+          IssuerSigningKey         = new SymmetricSecurityKey(key),
+          ClockSkew                = TimeSpan.Zero
+      };
+  })
+  // c) Google OAuth2
+  .AddGoogle(GoogleDefaults.AuthenticationScheme, opts =>
+  {
+      opts.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+      opts.CallbackPath = "/api/auth/google-response";
+      opts.ClientId     = builder.Configuration["Authentication:Google:ClientId"]!;
+      opts.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+
+      // korelacja/nonce też Lax, żeby działało na localhost
+      opts.CorrelationCookie.SameSite = SameSiteMode.None;
+      opts.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+      // Removed NonceCookie configuration as it is not supported by GoogleOptions
+  });
 
 builder.Services.AddAuthorization();
 
-// 4) Twoje serwisy (wkrótce stworzymy IUserService)
-builder.Services.AddSingleton<IUserService, UserService>();
-
+// --- 4) Twoje serwisy i kontrolery
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
+
 var app = builder.Build();
 
-// kolejność middleware jest istotna:
+// --- 5) Middleware pipeline
+app.UseRouting();
+
+// CORS **przed** auth, by preflighty przeszły
 app.UseCors("AllowFrontend");
+
+// Cookie policy – dodatkowa gwarancja SameSite/Secure
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax,
+    Secure = CookieSecurePolicy.SameAsRequest
+});
+
+// Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();
