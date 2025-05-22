@@ -191,11 +191,11 @@ useEffect(() => {
     <>
       <article className="article-header">
         <h1>ManageMe</h1>
-        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Wyloguj</button> <button
+        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Logout</button> <button
     className="theme-toggle"
     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
   >
-    {theme === "dark" ? "Jasny" : "Ciemny"}
+    {theme === "dark" ? "Light" : "Dark"}
   </button></p> 
       </article>
       <section className="section-content-projects">
