@@ -49,7 +49,7 @@ const LoginForm: React.FC = () => {
         <button
           type="button"
           className="google-button"
-          onClick={() => window.location.href = GOOGLE_LOGIN_URL}
+          onClick={() => window.location.href = 'http://localhost:5000/api/auth/google-login'}
         >
           Zaloguj przez Google
         </button>

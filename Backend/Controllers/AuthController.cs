@@ -1,16 +1,17 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using DTO;
 using Backend.Models;
 using Backend.Services;
+using DTO;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Backend.Controllers;
 
@@ -20,16 +21,15 @@ public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly JwtSettings _jwtSettings;
-    // prosta pamięć na refresh tokeny:
     private static readonly Dictionary<string, int> _refreshTokens = new();
 
-    public AuthController(IUserService userService, IOptions<JwtSettings> opt)
+    public AuthController(IUserService userService, IOptions<JwtSettings> opts)
     {
-        _userService = userService;
-        _jwtSettings = opt.Value;
+        _userService  = userService;
+        _jwtSettings = opts.Value;
     }
 
-    [AllowAnonymous]
+    // ========== Zwykłe logowanie ==========
     [HttpPost("login")]
     public ActionResult<LoginResponse> Login([FromBody] LoginRequest req)
     {
@@ -37,30 +37,29 @@ public class AuthController : ControllerBase
         if (user is null) return Unauthorized("Nieprawidłowy login lub hasło");
 
         var token = GenerateJwt(user);
-        var refreshToken = Guid.NewGuid().ToString();
-        _refreshTokens[refreshToken] = user.Id;
+        var refresh = Guid.NewGuid().ToString();
+        _refreshTokens[refresh] = user.Id;
 
-        return Ok(new LoginResponse { Token = token, RefreshToken = refreshToken });
+        return Ok(new LoginResponse { Token = token, RefreshToken = refresh });
     }
 
     [HttpPost("refresh")]
     public ActionResult<LoginResponse> Refresh([FromBody] RefreshRequest req)
     {
-        if (!_refreshTokens.TryGetValue(req.RefreshToken, out var userId))
+        if (!_refreshTokens.TryGetValue(req.RefreshToken!, out var userId))
             return BadRequest("Błędny refresh token");
 
         var user = _userService.GetById(userId)!;
         var newToken = GenerateJwt(user);
         var newRefresh = Guid.NewGuid().ToString();
 
-        // wymień
-        _refreshTokens.Remove(req.RefreshToken);
+        _refreshTokens.Remove(req.RefreshToken!);
         _refreshTokens[newRefresh] = userId;
 
         return Ok(new LoginResponse { Token = newToken, RefreshToken = newRefresh });
     }
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("me")]
     public ActionResult<UserDto> Me()
     {
@@ -69,70 +68,81 @@ public class AuthController : ControllerBase
         return Ok(new UserDto { Id = u.Id, Username = u.Username, Email = u.Email, Role = u.Role });
     }
 
-    private string GenerateJwt(User user)
+    [HttpPost("logout")]
+    public IActionResult Logout([FromBody] LogoutRequest req)
     {
-        var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
-            }),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-            Issuer = _jwtSettings.Issuer,
-            Audience = _jwtSettings.Audience,
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                                                        SecurityAlgorithms.HmacSha256Signature)
-        };
-        return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+        if (_refreshTokens.ContainsKey(req.RefreshToken!))
+            _refreshTokens.Remove(req.RefreshToken!);
+        return NoContent();
     }
 
+    // ========== Google OAuth2 ==========
     [AllowAnonymous]
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {
-        return Challenge(new AuthenticationProperties(), GoogleDefaults.AuthenticationScheme);
+        // wykonaj Challenge – przekieruje do Google
+        var props = new AuthenticationProperties
+        {
+            RedirectUri = Url.Action(nameof(GoogleResponse), "Auth")
+        };
+        return Challenge(props, GoogleDefaults.AuthenticationScheme);
     }
 
     [AllowAnonymous]
     [HttpGet("google-response")]
     public async Task<IActionResult> GoogleResponse()
     {
-        var result = await HttpContext.AuthenticateAsync(
-                       CookieAuthenticationDefaults.AuthenticationScheme);
-        if (!result.Succeeded) return BadRequest("Google authentication failed");
+        // odczytaj wynik z cookie-scheme
+        var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        if (!result.Succeeded)
+            return BadRequest("Google authentication failed");
 
-        // wyciągamy dane z tokena Google
-        var claims = result.Principal!.Claims;
-        var email  = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!;
-        var name   = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value ?? "";
-        var surname= claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value ?? "";
+        // pobierz dane
+        var claims  = result.Principal!.Claims;
+        var email   = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!;
+        var name    = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value  ?? "";
+        var surname = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value    ?? "";
 
-        // sprawdź, czy mamy w lokalnej bazie
+        // znajdź lub utwórz usera w Twojej bazie
         var user = _userService.GetByEmail(email)
-               ?? _userService.CreateExternalUser(new User {
-                    Email     = email,
-                    FirstName = name,
-                    LastName  = surname,
-                    Username  = email,
-                    PasswordHash = null    // bo OAuth
-                 });
+                   ?? _userService.CreateExternalUser(new User {
+                       Email       = email,
+                       FirstName   = name,
+                       LastName    = surname,
+                       Username    = email,
+                       PasswordHash= null
+                   });
 
-        // wygeneruj JWT z rolą
-        var token = GenerateJwt(user);
+        // wygeneruj własny JWT
+        var jwt = GenerateJwt(user);
 
-        // zwróć do frontu (możesz przekierować do Vite z query)
-        var frontendUrl = "http://localhost:5173/auth-callback";
-        return Redirect($"{frontendUrl}?token={token}&role={user.Role}");
+        // przekieruj na frontend z tokenem (możesz zamiast Google.com dać swój Vite)
+        var frontendUrl = $"http://localhost:5173?token={jwt}&role={user.Role}";
+        return Redirect(frontendUrl);
     }
 
-    [HttpPost("logout")]
-     public IActionResult Logout([FromBody] LogoutRequest req)
+    // ======== Helpers ========
+    private string GenerateJwt(User user)
+    {
+        var keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+        var handler  = new JwtSecurityTokenHandler();
+        var desc     = new SecurityTokenDescriptor
         {
-            if (_refreshTokens.ContainsKey(req.RefreshToken))
-                _refreshTokens.Remove(req.RefreshToken);
-            return NoContent();  
-        }
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email ?? "")
+            }),
+            Expires            = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            Issuer             = _jwtSettings.Issuer,
+            Audience           = _jwtSettings.Audience,
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(keyBytes),
+                SecurityAlgorithms.HmacSha256
+            )
+        };
+        return handler.WriteToken(handler.CreateToken(desc));
+    }
 }
