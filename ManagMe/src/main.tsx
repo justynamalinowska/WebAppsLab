@@ -16,7 +16,6 @@ import { auth } from './components/Firebase';
 import {
   onAuthStateChanged,
   getRedirectResult,
-  signOut,
   User
 } from 'firebase/auth';
 
