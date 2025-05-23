@@ -5,7 +5,7 @@ import {
   Routes,
   Route,
   Navigate,
-  useNavigate
+  useNavigate,
 } from 'react-router-dom';
 import './index.css';
 
@@ -16,7 +16,7 @@ import { auth } from './components/Firebase';
 import {
   onAuthStateChanged,
   getRedirectResult,
-  User
+  User,
 } from 'firebase/auth';
 
 const MainAppContent: React.FC = () => {
@@ -39,7 +39,7 @@ const MainAppContent: React.FC = () => {
             const { token, refreshToken } = await res.json();
             localStorage.setItem('token', token);
             localStorage.setItem('refreshToken', refreshToken);
-            navigate('/', { replace: true });
+            window.location.href = '/';
           }
         }
       })
@@ -47,40 +47,33 @@ const MainAppContent: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-      
+
     const unsub = onAuthStateChanged(auth, (u) => {
       setFirebaseUser(u);
       setLoading(false);
     });
+
     return unsub;
-  }, [navigate]);
+  }, []);
 
   if (loading) return <div>Ładowanie…</div>;
+
+  const isAuthenticated = !!localStorage.getItem('token');
 
   return (
     <Routes>
       <Route
-        path="/login"
-        element={
-          localStorage.getItem('token') ? (
-            <Navigate to="/" replace />
-          ) : (
-            <LoginForm />
-          )
-        }
-      />
-
-<Route
         path="/"
         element={
-          localStorage.getItem('token') ? (
-            <Home />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          isAuthenticated ? <Home /> : <Navigate to="/login" replace />
         }
       />
-
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
