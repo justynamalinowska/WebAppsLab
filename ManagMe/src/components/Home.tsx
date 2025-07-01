@@ -33,29 +33,31 @@ const Home = () => {
   // Task CRUD
 //   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
 
-const navigate = useNavigate();
+const [theme, setTheme] = useState<"dark" | "light">(
+    (localStorage.getItem("theme") as "dark" | "light") || "dark"
+  );
+
+  const [user, setUser] = useState<IUser | null>(null);
+  const navigate = useNavigate();
 
 const handleLogout = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
-
-  try {
-    if (refreshToken) {
-      // jeśli dodałeś endpoint POST /auth/logout, wyślij tam request z auth
-      await fetchWithAuth("/auth/logout", {
-        method: "POST",
-        body: JSON.stringify({ refreshToken })
-      });
+    const refreshToken = localStorage.getItem("refreshToken");
+  
+    try {
+      if (refreshToken) {
+        await fetchWithAuth("/auth/logout", {
+          method: "POST",
+          body: JSON.stringify({ refreshToken })
+        });
+      }
+    } catch (err) {
+      console.error("Błąd przy wylogowaniu:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      navigate("/login", { replace: true });
     }
-  } catch (err) {
-    console.error("Błąd przy wylogowaniu:", err);
-  } finally {
-    // niezależnie od wyniku żądania, czyścimy dane i przekierowujemy
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    navigate("/login", { replace: true });
-  }
-};
-  const [user, setUser] = useState<IUser | null>(null);
+  };
   // // Przykładowy użytkownik
   // const [user] = useState<IUser>({
   //   id: "1",
@@ -81,6 +83,11 @@ const handleLogout = async () => {
     Api.getProjects().then(setProjectsList);
   }, []);
 
+  useEffect(() => {
+  document.body.classList.remove("dark", "light");
+  document.body.classList.add(theme);
+  localStorage.setItem("theme", theme);
+}, [theme]);
 
   // Helpers do localStorage
   const saveProjects = (list: IProject[]) => {
@@ -182,8 +189,13 @@ const handleLogout = async () => {
     <>
       <article className="article-header">
         <h1>ManageMe</h1>
-        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Wyloguj</button></p> 
-      </article>
+        <p>{user? `Welcome, ${user.username}`: "Ładowanie…"}<button className="logout-button" onClick={handleLogout}>Logout</button> <button
+    className="theme-toggle"
+    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
+    {theme === "dark" ? "Light" : "Dark"}
+    </button></p> 
+    </article>
       <section className="section-content-projects">
         {shownPage === PageEnum.list && (
           <ProjectList

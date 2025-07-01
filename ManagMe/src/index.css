@@ -13,6 +13,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+body.dark {
+  background-color: #242424;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+body.light {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.theme-toggle {
+  margin-left: 1rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
