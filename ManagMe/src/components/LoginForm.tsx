@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './LoginForm.style.css'; 
 
 const API_URL = 'http://localhost:5000/api/auth';
 
@@ -27,18 +28,38 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Login</label>
-        <input value={username} onChange={e => setUsername(e.target.value)} />
-      </div>
-      <div>
-        <label>Hasło</label>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      </div>
-      <button type="submit">Zaloguj</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </form>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Logowanie</h2>
+
+        <div className="form-group">
+          <label htmlFor="username">Login</label>
+          <input
+            id="username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Hasło</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && <p className="error">{error}</p>}
+
+        <button type="submit" className="btn primary">
+          Zaloguj
+        </button>
+      </form>
+    </div>
   );
 };
 
