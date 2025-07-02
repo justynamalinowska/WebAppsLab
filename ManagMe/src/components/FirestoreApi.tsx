@@ -21,22 +21,17 @@ import {
   const storiesCol  = collection(db, "stories");
   const tasksCol    = collection(db, "tasks");
   
-  // helper do rzutowania Timestamp → Date
   function toDate(value: any): Date {
     return value instanceof Timestamp ? value.toDate() : new Date(value);
   }
   
   export default class FirestoreApi {
-    // ——— PROJECTS ——————————————————————————————————
-  
-    /** Pobiera wszystkie projekty wraz z ich stories (bez zadań) */
     static async getProjects(): Promise<IProject[]> {
       const projSnap = await getDocs(projectsCol);
       const projects = await Promise.all(
         projSnap.docs.map(async pd => {
           const raw = pd.data() as Omit<IProject, "id" | "stories">;
           const id  = Number(pd.id);
-          // dla każdego projektu dorzuć tablicę historii:
           const stories = await this.getStories(id);
           return {
             id,
@@ -50,7 +45,6 @@ import {
       return projects;
     }
   
-    /** Dodaje nowy projekt */
     static async addProject(p: IProject): Promise<void> {
       await setDoc(doc(projectsCol, p.id.toString()), {
         name:        p.name,
@@ -59,7 +53,6 @@ import {
       });
     }
   
-    /** Aktualizuje istniejący projekt */
     static async updateProject(p: IProject): Promise<void> {
       await updateDoc(doc(projectsCol, p.id.toString()), {
         name:        p.name,
@@ -68,29 +61,21 @@ import {
       });
     }
   
-    /** Usuwa projekt i kaskadowo wszystkie jego stories i tasks */
     static async deleteProject(projectId: number): Promise<void> {
       const batch = writeBatch(db);
-      // usuń stories + ich tasks
       const storyQ = query(storiesCol, where("projectId", "==", projectId));
       const storySnap = await getDocs(storyQ);
       for (const sd of storySnap.docs) {
         const sid = Number(sd.id);
-        // tasks tej historii
         const taskQ = query(tasksCol, where("storyId", "==", sid));
         const taskSnap = await getDocs(taskQ);
         taskSnap.docs.forEach(td => batch.delete(td.ref));
-        // sama historia
         batch.delete(sd.ref);
       }
-      // usuń projekt
       batch.delete(doc(projectsCol, projectId.toString()));
       await batch.commit();
     }
   
-    // ——— STORIES ——————————————————————————————————
-  
-    /** Pobiera wszystkie historie z danego projektu */
     static async getStories(projectId: number): Promise<IStory[]> {
       const q    = query(storiesCol, where("projectId", "==", projectId));
       const snap = await getDocs(q);
@@ -109,7 +94,6 @@ import {
       });
     }
   
-    /** Dodaje nową historię */
     static async addStory(s: IStory): Promise<void> {
       await setDoc(doc(storiesCol, s.id.toString()), {
         title:       s.title,
@@ -122,7 +106,6 @@ import {
       });
     }
   
-    /** Aktualizuje istniejącą historię */
     static async updateStory(s: IStory): Promise<void> {
       await updateDoc(doc(storiesCol, s.id.toString()), {
         title:       s.title,
@@ -130,11 +113,9 @@ import {
         priority:    s.priority,
         status:      s.status,
         ownerId:     s.ownerId,
-        // nie ruszamy createdAt
       });
     }
   
-    /** Usuwa historię i jej tasks */
     static async deleteStory(storyId: number): Promise<void> {
       const batch  = writeBatch(db);
       const taskQ  = query(tasksCol, where("storyId", "==", storyId));
@@ -167,12 +148,10 @@ import {
       });
     }
   
-    /** Pobiera zadania tylko dla jednej historii (Kanban) */
     static async getTasksByStory(storyId: number): Promise<ITask[]> {
       return (await this.getTasks()).filter(t => t.storyId === storyId);
     }
   
-    /** Dodaje nowe zadanie */
     static async addTask(t: ITask): Promise<void> {
       await setDoc(doc(tasksCol, t.id.toString()), {
         name:           t.name,
@@ -188,7 +167,6 @@ import {
       });
     }
   
-    /** Aktualizuje istniejące zadanie */
     static async updateTask(t: ITask): Promise<void> {
       await updateDoc(doc(tasksCol, t.id.toString()), {
         name:           t.name,
@@ -199,11 +177,9 @@ import {
         estimatedHours: t.estimatedHours,
         startDate:      t.startDate ? Timestamp.fromDate(t.startDate) : null,
         endDate:        t.endDate   ? Timestamp.fromDate(t.endDate)   : null,
-        // nie ruszamy createdAt
       });
     }
   
-    /** Usuwa zadanie */
     static async deleteTask(taskId: number): Promise<void> {
       await deleteDoc(doc(tasksCol, taskId.toString()));
     }
