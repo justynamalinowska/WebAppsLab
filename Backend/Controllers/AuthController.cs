@@ -17,7 +17,6 @@ public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly JwtSettings _jwtSettings;
-    // prosta pamięć na refresh tokeny:
     private static readonly Dictionary<string, int> _refreshTokens = new();
 
     public AuthController(IUserService userService, IOptions<JwtSettings> opt)
@@ -49,7 +48,6 @@ public class AuthController : ControllerBase
         var newToken = GenerateJwt(user);
         var newRefresh = Guid.NewGuid().ToString();
 
-        // wymień
         _refreshTokens.Remove(req.RefreshToken);
         _refreshTokens[newRefresh] = userId;
 
@@ -79,8 +77,7 @@ public class AuthController : ControllerBase
             Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
             Issuer = _jwtSettings.Issuer,
             Audience = _jwtSettings.Audience,
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                                                        SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
         return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
     }

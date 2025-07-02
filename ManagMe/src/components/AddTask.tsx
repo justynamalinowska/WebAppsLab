@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Project.Form.style.css";  // zakładam, że masz wspólne style formularzy
+import "./Project.Form.style.css"; 
 import { ITask } from "./Task.type";
 
 type Props = {

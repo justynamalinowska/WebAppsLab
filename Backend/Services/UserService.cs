@@ -11,7 +11,7 @@ public class UserService : IUserService
             Id = 1,
             Username = "justynka",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("password"),
-            Email = "test@example.com"
+            Email = "justynka@gmail.com"
         }
     ];
 
