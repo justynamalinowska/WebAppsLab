@@ -1,4 +1,3 @@
-// src/components/Home.tsx
 import "./Home.style.css";
 import { useEffect, useState } from "react";
 import { IProject, PageEnum } from "./Project.type";
@@ -19,21 +18,12 @@ import { useNavigate } from "react-router-dom";
 import {fetchWithAuth} from "./BackendApi";
 
 const Home = () => {
-  // Projekty
   const [projectList, setProjectsList] = useState<IProject[]>([]);
   const [currentProject, setCurrentProject] = useState<IProject | null>(null);
-
-  // Nawigacja
   const [shownPage, setShownPage] = useState<PageEnum>(PageEnum.list);
   const [dataToEditProject, setDataToEditProject] = useState<IProject>({} as IProject);
-
-  // Story
   const [selectedStory, setSelectedStory] = useState<IStory | null>(null);
-
-  // Task CRUD
-//   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null);
-
-const [theme, setTheme] = useState<"dark" | "light">(
+  const [theme, setTheme] = useState<"dark" | "light">(
     (localStorage.getItem("theme") as "dark" | "light") || "dark"
   );
 
@@ -58,15 +48,19 @@ const handleLogout = async () => {
       navigate("/login", { replace: true });
     }
   };
-  // // Przykładowy użytkownik
-  // const [user] = useState<IUser>({
-  //   id: "1",
-  //   firstName: "Justyna",
-  //   lastName: "Malinowska",
-  //   Role: "Admin",
-  // });
 
-  // Wczytaj projekty
+  const refreshCurrentProject = async () => {
+    if (!currentProject) return;
+    const updatedStories = await Api.getStories(currentProject.id);
+    const updated = { ...currentProject, stories: updatedStories };
+    setCurrentProject(updated);
+
+    const updatedProjectList = projectList.map(p =>
+      p.id === currentProject.id ? updated : p
+    );
+    setProjectsList(updatedProjectList);
+  };
+
   useEffect(() => {
     (async () => {
       try {
@@ -78,8 +72,6 @@ const handleLogout = async () => {
         navigate("/login", { replace: true });
       }
     })();
-
-    // zamiast Api.getProjects → BackendApi.getProjects()
     Api.getProjects().then(setProjectsList);
   }, []);
 
@@ -89,26 +81,23 @@ const handleLogout = async () => {
   localStorage.setItem("theme", theme);
 }, [theme]);
 
-  // Helpers do localStorage
-  const saveProjects = (list: IProject[]) => {
-    setProjectsList(list);
-    window.localStorage.setItem("projects", JSON.stringify(list));
-  };
-  const saveStories = (stories: IStory[]) => {
-    if (!currentProject) return;
-    const updated = { ...currentProject, stories };
-    const updatedList = projectList.map(p =>
-      p.id === updated.id ? updated : p
-    );
-    saveProjects(updatedList);
-    setCurrentProject(updated);
-  };
+  // const saveProjects = (list: IProject[]) => {
+  //   setProjectsList(list);
+  //   window.localStorage.setItem("projects", JSON.stringify(list));
+  // };
+  // const saveStories = (stories: IStory[]) => {
+  //   if (!currentProject) return;
+  //   const updated = { ...currentProject, stories };
+  //   const updatedList = projectList.map(p =>
+  //     p.id === updated.id ? updated : p
+  //   );
+  //   saveProjects(updatedList);
+  //   setCurrentProject(updated);
+  // };
 
-  // Generatory ID
   const nextProjId = () =>
     projectList.length ? Math.max(...projectList.map(p => p.id)) + 1 : 1;
 
-  // **GLOBALNY** generator dla story — unikalne w całej aplikacji
   const nextStoryId = () => {
     const allStories = projectList.flatMap(p => p.stories || []);
     return allStories.length
@@ -116,61 +105,74 @@ const handleLogout = async () => {
       : 1;
   };
 
-  // PROJECT HANDLERS
-  const addProject = (p: IProject) => {
-    saveProjects([...projectList, { ...p, id: nextProjId(), stories: [] }]);
-    setShownPage(PageEnum.list);
+  const addProject = async (p: IProject) => {
+  const newProject = { ...p, id: nextProjId(), stories: [] };
+  await Api.addProject(newProject);
+  const refreshed = await Api.getProjects();
+  setProjectsList(refreshed);
+  setShownPage(PageEnum.list);
   };
+
   const startEditProject = (p: IProject) => {
     setDataToEditProject(p);
     setShownPage(PageEnum.edit);
   };
-  const updateProject = (p: IProject) => {
-    saveProjects(projectList.map(x => x.id === p.id ? p : x));
-    setShownPage(PageEnum.list);
+
+  const updateProject = async (p: IProject) => {
+  await Api.updateProject(p);
+  const refreshed = await Api.getProjects();
+  setProjectsList(refreshed);
+  setShownPage(PageEnum.list);
   };
-  const deleteProject = (p: IProject) => {
-    saveProjects(projectList.filter(x => x.id !== p.id));
+
+  const deleteProject = async (p: IProject) => {
+  await Api.deleteProject(p.id);
+  const refreshed = await Api.getProjects();
+  setProjectsList(refreshed);
   };
-  const selectProject = (p: IProject) => {
-    setCurrentProject({ ...p, stories: p.stories || [] });
-    Api.setCurrentProject(p);
+
+  const selectProject = async (p: IProject) => {
+  const stories = await Api.getStories(p.id);
+  const fullProject = { ...p, stories };
+  setCurrentProject(fullProject);
+  Api.setCurrentProject(fullProject);
+  setShownPage(PageEnum.stories);
+  };
+
+
+  const addStory = async (s: IStory) => {
+    if (!currentProject) return;
+    const newStory = { ...s, id: nextStoryId(), projectId: currentProject.id };
+    await Api.addStory(newStory);
+    await refreshCurrentProject(); 
     setShownPage(PageEnum.stories);
   };
 
-  // STORY HANDLERS
-  const addStory = (s: IStory) => {
-    if (!currentProject) return;
-    saveStories([
-      ...(currentProject.stories || []),
-      { ...s, id: nextStoryId(), projectId: currentProject.id },
-    ]);
+  const updateStory = async (s: IStory) => {
+    await Api.updateStory(s);
+    await refreshCurrentProject(); 
     setShownPage(PageEnum.stories);
   };
-  const startEditStory = (s: IStory) => {
-    saveStories(
-      currentProject!.stories!.map(x => x.id === s.id ? s : x)
-    );
-    setSelectedStory(s);
-    setShownPage(PageEnum.editStory);
-  };
-  const deleteStory = (s: IStory) => {
-    saveStories(
-      currentProject!.stories!.filter(x => x.id !== s.id)
-    );
+
+  const deleteStory = async (s: IStory) => {
+    await Api.deleteStory(s.id);
+    await refreshCurrentProject(); 
     setShownPage(PageEnum.stories);
   };
+
   const openKanban = (s: IStory) => {
     setSelectedStory(s);
     setShownPage(PageEnum.kanban);
   };
 
-  // TASK HANDLERS
   const openAddTask = () => setShownPage(PageEnum.addTask);
+
   const addTask = async (t: ITask) => {
     await Api.addTask(t);
+    await refreshCurrentProject();
     setShownPage(PageEnum.kanban);
   };
+
 //   const openEditTask = (t: ITask) => {
 //     setTaskToEdit(t);
 //     setShownPage(PageEnum.editTask);
@@ -180,7 +182,6 @@ const handleLogout = async () => {
 //     setShownPage(PageEnum.kanban);
 //   };
 
-  // Wracanie
   const backToList = () => setShownPage(PageEnum.list);
   const backToStories = () => setShownPage(PageEnum.stories);
   const backToKanban = () => setShownPage(PageEnum.kanban);
@@ -227,7 +228,7 @@ const handleLogout = async () => {
             project={currentProject}
             stories={currentProject.stories!}
             onSelect={openKanban}
-            onEdit={startEditStory}
+            onEdit={updateStory}
             onDelete={deleteStory}
             onBack={backToList}
             onPageChange={setShownPage}
@@ -247,7 +248,7 @@ const handleLogout = async () => {
           <EditStory
             data={selectedStory}
             onBackBtnClickHnd={backToStories}
-            onUpdateClickHnd={startEditStory}
+            onUpdateClickHnd={updateStory}
           />
         )}
 
