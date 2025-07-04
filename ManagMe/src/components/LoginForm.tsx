@@ -3,7 +3,7 @@ import './LoginForm.style.css';
 
 const API_URL = 'http://localhost:5000/api/auth';
 
-const LoginForm: React.FC = () => {
+const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
