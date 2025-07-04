@@ -20,7 +20,6 @@ const LoginForm: React.FC = () => {
       const { token, refreshToken } = await res.json();
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
-      // przekieruj np. do “/”
       window.location.href = '/';
     } catch (err: any) {
       setError(err.message);

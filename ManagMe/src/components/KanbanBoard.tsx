@@ -1,4 +1,3 @@
-// src/components/KanbanBoard.tsx
 import { useEffect, useState } from "react";
 import "./KanbanBoard.style.css";
 import { ITask } from "./Task.type";
@@ -8,8 +7,8 @@ import AddTask from "./AddTask";
 import { IStory } from "./Story.type";
 
 type Props = {
-  story: IStory;        // ID bieżącej story
-  onBack: () => void;     // powrót do listy stories
+  story: IStory;       
+  onBack: () => void;    
   onAdd: () => void;
 
 };
@@ -86,7 +85,6 @@ const KanbanBoard = ({ story, onBack}: Props) => {
           onUpdate={async upd => {
             await Api.updateTask(upd);
             closeDetails();
-            // jeśli potrzebujesz edycji pól, możesz tu również przekazać onEdit
           }}
         />
       )}

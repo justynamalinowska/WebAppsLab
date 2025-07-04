@@ -10,7 +10,6 @@ import {
     writeBatch,
     Timestamp,
     DocumentData,
-    QueryDocumentSnapshot,
   } from "firebase/firestore";
   import { db } from "./Firebase";
   import { IProject } from "./Project.type";
@@ -46,7 +45,7 @@ import {
     }
   
     static async addProject(p: IProject): Promise<void> {
-      console.log(">>> addProject działa! dane:", p);
+      console.log(" addProject działa! dane:", p);
       await setDoc(doc(projectsCol, p.id.toString()), {
         name:        p.name,
         description: p.description,
