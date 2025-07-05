@@ -56,7 +56,7 @@ const AddStory = (props: Props) => {
 
     return (
         <div className="form-container">
-            <h2>Add Story</h2>
+            <h2>New Story</h2>
             <form onSubmit={onSubmitBtnClickHnd}>
                 <div>
                     <label>Title</label>

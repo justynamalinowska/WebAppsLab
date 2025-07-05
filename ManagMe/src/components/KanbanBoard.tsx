@@ -69,6 +69,7 @@ const KanbanBoard = ({ story, onBack}: Props) => {
                 <div
                   key={t.id}
                   className="task-card"
+                  data-testid={`task-${state}`}
                   onClick={() => openDetails(t)}
                 >
                   {t.name}
